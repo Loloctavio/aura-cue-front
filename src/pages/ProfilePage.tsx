@@ -63,7 +63,7 @@ export function ProfilePage() {
   });
 
   const connectSpotifyMut = useMutation({
-    mutationFn: () => getSpotifyConnectUrl("/profile"),
+    mutationFn: () => getSpotifyConnectUrl("/"),
     onSuccess: (url) => {
       window.location.assign(url);
     },
