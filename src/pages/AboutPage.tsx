@@ -53,7 +53,14 @@ export function AboutPage() {
         <Pill>Multi-agent selection</Pill>
       </Row>
 
-      <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 14 }}>
+      <div
+        style={{
+          marginTop: 14,
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
+          gap: 14,
+        }}
+      >
         <Card>
           <CardTitle>Collaboration flow</CardTitle>
           <Divider />
@@ -126,7 +133,7 @@ export function AboutPage() {
           <CardTitle>How to read song metadata</CardTitle>
           <Divider />
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))", gap: 14 }}>
             <div>
               <b>suggested_by</b>
               <Muted>

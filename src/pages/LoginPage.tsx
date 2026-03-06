@@ -34,11 +34,11 @@ export function LoginPage() {
   };
 
   return (
-    <Page style={{ minHeight: "calc(100vh - 40px)", display: "grid", placeItems: "center" }}>
+    <Page style={{ minHeight: "calc(100vh - 20px)", display: "grid", placeItems: "center" }}>
       <div style={{ width: "min(580px, 100%)" }}>
         <Card style={{ padding: 24 }}>
-          <H1 style={{ fontSize: 46 }}>Welcome back</H1>
-          <Muted style={{ fontSize: 20 }}>Build playlists generated from your prompt.</Muted>
+          <H1>Welcome back</H1>
+          <Muted style={{ fontSize: "clamp(16px, 4.3vw, 20px)" }}>Build playlists generated from your prompt.</Muted>
 
           <form onSubmit={handleSubmit(onSubmit)} style={{ marginTop: 20 }}>
             <Stack style={{ gap: 12 }}>

@@ -86,9 +86,9 @@ export function PlaylistDetailPage() {
   return (
     <Page>
       <Row style={{ justifyContent: "space-between", alignItems: "flex-end", gap: 14 }}>
-        <div style={{ flex: 1, minWidth: 280 }}>
-          <H1 style={{ fontSize: 46 }}>{data.name ?? "Untitled"}</H1>
-          <Muted style={{ fontSize: 17 }}>{data.description ?? "No description"}</Muted>
+        <div style={{ flex: 1, minWidth: "min(100%, 240px)" }}>
+          <H1>{data.name ?? "Untitled"}</H1>
+          <Muted style={{ fontSize: "clamp(15px, 3.6vw, 17px)" }}>{data.description ?? "No description"}</Muted>
         </div>
         <Pill>{data.total_songs} songs</Pill>
       </Row>
@@ -108,7 +108,14 @@ export function PlaylistDetailPage() {
         </Link>
       </Row>
 
-      <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(330px, 1fr))", gap: 14 }}>
+      <div
+        style={{
+          marginTop: 14,
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 330px), 1fr))",
+          gap: 14,
+        }}
+      >
         <Card>
           <CardTitle>Details</CardTitle>
           <Muted>Created: {data.created_at ? new Date(data.created_at).toLocaleString() : "-"}</Muted>

@@ -76,9 +76,9 @@ export function GeneratePage() {
   return (
     <Page>
       <Row style={{ justifyContent: "space-between", alignItems: "flex-end" }}>
-        <div style={{ flex: 1, minWidth: 280 }}>
-          <H1 style={{ fontSize: 48 }}>Generate</H1>
-          <Muted style={{ fontSize: 18 }}>Describe the vibe. We will do the rest.</Muted>
+        <div style={{ flex: 1, minWidth: "min(100%, 240px)" }}>
+          <H1>Generate</H1>
+          <Muted style={{ fontSize: "clamp(15px, 3.8vw, 18px)" }}>Describe the vibe. We will do the rest.</Muted>
         </div>
         {draft && <Pill>{draft.total_songs} songs</Pill>}
       </Row>

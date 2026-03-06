@@ -13,6 +13,8 @@ function NavItem({ to, label }: { to: string; label: string }) {
       to={to}
       style={{
         minHeight: 40,
+        flex: "0 0 auto",
+        whiteSpace: "nowrap",
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
@@ -46,19 +48,27 @@ export function NavBar() {
         position: "sticky",
         top: 0,
         zIndex: 20,
-        padding: "12px 14px",
+        padding: "clamp(8px, 2.4vw, 12px) clamp(10px, 3vw, 14px)",
         background: "color-mix(in srgb, var(--bg) 80%, transparent)",
         backdropFilter: "blur(7px)",
       }}
     >
       <Card style={{ padding: 10 }}>
         <Row style={{ justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-          <Row style={{ flex: 1, gap: 10 }}>
+          <Row style={{ flex: "1 1 520px", minWidth: 0, gap: 10 }}>
             <Pill>
               <span style={{ fontWeight: 800, letterSpacing: "-0.02em", color: "var(--text)" }}>SayPlay</span>
             </Pill>
 
-            <Row style={{ gap: 10 }}>
+            <Row
+              style={{
+                gap: 10,
+                flexWrap: "nowrap",
+                overflowX: "auto",
+                maxWidth: "100%",
+                paddingBottom: 2,
+              }}
+            >
               <NavItem to="/" label="Playlists" />
               <NavItem to="/generate" label="Generate" />
               <NavItem to="/profile" label="Profile" />
@@ -66,7 +76,7 @@ export function NavBar() {
             </Row>
           </Row>
 
-          <Row style={{ gap: 10 }}>
+          <Row style={{ gap: 10, marginLeft: "auto" }}>
             <Button onClick={toggle}>{theme === "light" ? "Dark" : "Light"}</Button>
             <PrimaryButton onClick={logout}>Logout</PrimaryButton>
           </Row>

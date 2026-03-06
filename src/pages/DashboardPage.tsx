@@ -14,9 +14,9 @@ export function DashboardPage() {
   return (
     <Page>
       <Row style={{ justifyContent: "space-between", alignItems: "flex-end", gap: 14 }}>
-        <div style={{ flex: 1, minWidth: 260 }}>
-          <H1 style={{ fontSize: 48 }}>My Playlists</H1>
-          <Muted style={{ fontSize: 18 }}>Your saved playlists in one place.</Muted>
+        <div style={{ flex: 1, minWidth: "min(100%, 230px)" }}>
+          <H1>My Playlists</H1>
+          <Muted style={{ fontSize: "clamp(15px, 3.8vw, 18px)" }}>Your saved playlists in one place.</Muted>
         </div>
 
         <Link to="/generate">
@@ -62,7 +62,7 @@ export function DashboardPage() {
                 <Card style={{ padding: 18 }}>
                   <Row style={{ justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
                     <div style={{ flex: 1, minWidth: 220 }}>
-                      <CardTitle style={{ fontSize: 32 }}>{p.name ?? "Untitled"}</CardTitle>
+                      <CardTitle style={{ fontSize: "clamp(24px, 6vw, 32px)" }}>{p.name ?? "Untitled"}</CardTitle>
                       <Muted style={{ marginTop: 4 }}>{p.description ?? "No description"}</Muted>
                       <Muted style={{ marginTop: 10 }}>
                         Updated: {p.updated_at ? new Date(p.updated_at).toLocaleDateString() : "-"}

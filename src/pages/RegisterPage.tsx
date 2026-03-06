@@ -35,12 +35,12 @@ export function RegisterPage() {
   };
 
   return (
-    <Page style={{ minHeight: "calc(100vh - 40px)", display: "grid", placeItems: "center" }}>
+    <Page style={{ minHeight: "calc(100vh - 20px)", display: "grid", placeItems: "center" }}>
       <div style={{ width: "min(610px, 100%)" }}>
         <Card style={{ padding: 24 }}>
           <Row style={{ justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
             <div>
-              <H1 style={{ fontSize: 48 }}>Register</H1>
+              <H1>Register</H1>
               <Muted>Create an account to generate and save playlists.</Muted>
             </div>
 

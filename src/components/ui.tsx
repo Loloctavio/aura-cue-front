@@ -14,8 +14,8 @@ export function Page({ children, style, ...props }: DivProps) {
       {...props}
       style={{
         width: "min(1120px, 100%)",
-        margin: "26px auto 38px",
-        padding: "0 18px",
+        margin: "clamp(14px, 3vw, 26px) auto clamp(24px, 4vw, 38px)",
+        padding: "0 clamp(12px, 3.8vw, 18px)",
         ...(style ?? {}),
       }}
     >
@@ -57,7 +57,7 @@ export function Card({ children, style, ...props }: DivProps) {
         background: "var(--panel)",
         border: "1px solid var(--border)",
         borderRadius: "var(--radius)",
-        padding: 20,
+        padding: "clamp(14px, 3vw, 20px)",
         boxShadow: "var(--shadow)",
         ...(style ?? {}),
       }}
@@ -77,7 +77,16 @@ export function CardTitle({ children, style, ...props }: H2Props) {
 
 export function H1({ children, style, ...props }: H1Props) {
   return (
-    <h1 {...props} style={{ margin: 0, fontSize: 48, lineHeight: 1.06, fontWeight: 800, ...(style ?? {}) }}>
+    <h1
+      {...props}
+      style={{
+        margin: 0,
+        fontSize: "clamp(2rem, 7vw, 3rem)",
+        lineHeight: 1.06,
+        fontWeight: 800,
+        ...(style ?? {}),
+      }}
+    >
       {children}
     </h1>
   );

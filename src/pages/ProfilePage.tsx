@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { changePassword, deleteMe, me, updateMe } from "../features/users/users.api";
+import { changePassword, deleteMe, getSpotifyConnectUrl, me, updateMe } from "../features/users/users.api";
 import { clearToken } from "../lib/auth";
 import {
   Button,
@@ -21,6 +21,7 @@ import {
 
 export function ProfilePage() {
   const nav = useNavigate();
+  const location = useLocation();
   const qc = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -61,6 +62,28 @@ export function ProfilePage() {
     },
   });
 
+  const connectSpotifyMut = useMutation({
+    mutationFn: () => getSpotifyConnectUrl("/profile"),
+    onSuccess: (url) => {
+      window.location.assign(url);
+    },
+  });
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const spotify = params.get("spotify");
+    if (!spotify) return;
+
+    if (spotify === "connected") {
+      qc.invalidateQueries({ queryKey: ["users", "me"] });
+    }
+
+    const message = params.get("message");
+    if (spotify === "error") {
+      alert(message ? `Spotify error: ${message}` : "Spotify connection failed.");
+    }
+  }, [location.search, qc]);
+
   const logout = () => {
     clearToken();
     qc.clear();
@@ -73,9 +96,9 @@ export function ProfilePage() {
   return (
     <Page>
       <Row style={{ justifyContent: "space-between", alignItems: "flex-end", gap: 12 }}>
-        <div style={{ flex: 1, minWidth: 240 }}>
-          <H1 style={{ fontSize: 48 }}>Profile</H1>
-          <Muted style={{ fontSize: 18 }}>Your account and security settings.</Muted>
+        <div style={{ flex: 1, minWidth: "min(100%, 220px)" }}>
+          <H1>Profile</H1>
+          <Muted style={{ fontSize: "clamp(15px, 3.8vw, 18px)" }}>Your account and security settings.</Muted>
         </div>
 
         <Row>
@@ -84,13 +107,15 @@ export function ProfilePage() {
         </Row>
       </Row>
 
-      <div style={{ marginTop: 18, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(330px, 1fr))", gap: 14 }}>
+      <div
+        style={{
+          marginTop: 18,
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 330px), 1fr))",
+          gap: 14,
+        }}
+      >
         <Card>
-          <CardTitle>Basic info</CardTitle>
-          <Muted>ID: {data.id}</Muted>
-
-          <Divider />
-
           <Stack>
             <div>
               <Muted>Username</Muted>
@@ -105,6 +130,33 @@ export function ProfilePage() {
                 Back
               </Link>
             </Row>
+          </Stack>
+        </Card>
+
+        <Card>
+          <CardTitle>Spotify</CardTitle>
+          <Muted>Connect your account to create playlists directly in Spotify.</Muted>
+
+          <Divider />
+
+          <Stack>
+            <Row>
+              <Pill>
+                {data.spotify_connected ? "Spotify connected" : "Spotify not connected"}
+              </Pill>
+            </Row>
+
+            {data.spotify?.spotify_user_id ? (
+              <Muted style={{ marginTop: 0 }}>Spotify user: {data.spotify.spotify_user_id}</Muted>
+            ) : null}
+
+            <PrimaryButton
+              onClick={() => connectSpotifyMut.mutate()}
+              disabled={connectSpotifyMut.isPending}
+              style={{ width: "fit-content" }}
+            >
+              {connectSpotifyMut.isPending ? "Connecting..." : "Connect with Spotify"}
+            </PrimaryButton>
           </Stack>
         </Card>
 
