@@ -189,6 +189,9 @@ export function GeneratePage() {
                   );
                 })}
               </ol>
+              <Muted>
+                Track metadata and links are provided by Spotify. Spotify is a trademark of Spotify AB.
+              </Muted>
             </Card>
           )}
         </Stack>

@@ -36,3 +36,8 @@ export async function getSpotifyConnectUrl(redirectTo = "/dashboard"): Promise<s
   });
   return data.authorization_url;
 }
+
+export async function disconnectSpotify(): Promise<{ disconnected: boolean }> {
+  const { data } = await api.delete<{ disconnected: boolean }>("/spotify/disconnect");
+  return data;
+}

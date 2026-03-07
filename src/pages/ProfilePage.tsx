@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { changePassword, deleteMe, getSpotifyConnectUrl, me, updateMe } from "../features/users/users.api";
+import { changePassword, deleteMe, disconnectSpotify, getSpotifyConnectUrl, me, updateMe } from "../features/users/users.api";
 import { clearToken } from "../lib/auth";
 import { useTheme } from "../theme";
 import {
@@ -68,6 +68,13 @@ export function ProfilePage() {
     mutationFn: () => getSpotifyConnectUrl("/dashboard"),
     onSuccess: (url) => {
       window.location.assign(url);
+    },
+  });
+
+  const disconnectSpotifyMut = useMutation({
+    mutationFn: disconnectSpotify,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["users", "me"] });
     },
   });
 
@@ -166,6 +173,20 @@ export function ProfilePage() {
             >
               {connectSpotifyMut.isPending ? "Connecting..." : "Connect with Spotify"}
             </PrimaryButton>
+
+            <DangerButton
+              onClick={() => {
+                if (confirm("Disconnect your Spotify account?")) disconnectSpotifyMut.mutate();
+              }}
+              disabled={!data.spotify_connected || disconnectSpotifyMut.isPending}
+              style={{ width: "fit-content" }}
+            >
+              {disconnectSpotifyMut.isPending ? "Disconnecting..." : "Disconnect Spotify"}
+            </DangerButton>
+
+            <Muted style={{ marginTop: 0 }}>
+              Spotify data used in this app stays linked to Spotify content and links.
+            </Muted>
           </Stack>
         </Card>
 

@@ -95,6 +95,11 @@ export function LandingPage() {
               </>
             )}
           </Row>
+          <Muted style={{ marginTop: 0, textAlign: "center" }}>
+            Spotify is a trademark of Spotify AB. This app is not affiliated with or endorsed by Spotify.
+            {" "}
+            <Link to="/privacy">Privacy Policy</Link>
+          </Muted>
         </Stack>
       </div>
 

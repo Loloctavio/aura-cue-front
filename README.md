@@ -117,7 +117,7 @@ When available, the UI displays recommendation agent and verification info per s
 
 ## Auth Flow
 
-- Access token is stored in `localStorage` under `sayplay_token`
+- Access token is stored in `sessionStorage` under `sayplay_token`
 - Axios automatically attaches `Authorization: Bearer <token>`
 - On `401`, token is cleared
 
