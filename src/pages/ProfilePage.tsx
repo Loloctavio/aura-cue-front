@@ -91,7 +91,10 @@ export function ProfilePage() {
     if (spotify === "error") {
       alert(message ? `Spotify error: ${message}` : "Spotify connection failed.");
     }
-  }, [location.search, qc]);
+
+    // Clear callback params so future reconnect callbacks always trigger this effect.
+    nav("/profile", { replace: true });
+  }, [location.search, qc, nav]);
 
   const logout = () => {
     clearToken();
