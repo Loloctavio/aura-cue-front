@@ -110,8 +110,11 @@ export function ProfilePage() {
     <Page>
       <Row style={{ justifyContent: "space-between", alignItems: "flex-end", gap: 12 }}>
         <div style={{ flex: 1, minWidth: "min(100%, 220px)" }}>
+          <Pill style={{ width: "fit-content", marginBottom: 14 }}>Account settings</Pill>
           <H1>Profile</H1>
-          <Muted style={{ fontSize: "clamp(15px, 3.8vw, 18px)" }}>Your account and security settings.</Muted>
+          <Muted style={{ fontSize: "clamp(15px, 3.8vw, 18px)", lineHeight: 1.65 }}>
+            Your account, Spotify connection, theme preference, and security settings.
+          </Muted>
         </div>
 
         <Row>
@@ -155,7 +158,7 @@ export function ProfilePage() {
 
         <Card>
           <CardTitle>Spotify</CardTitle>
-          <Muted>Connect your account to create playlists directly in Spotify.</Muted>
+          <Muted style={{ lineHeight: 1.65 }}>Connect your account to create playlists directly in Spotify.</Muted>
 
           <Divider />
 

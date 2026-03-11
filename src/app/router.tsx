@@ -9,10 +9,12 @@ import { ProfilePage } from "../pages/ProfilePage";
 import { ProtectedLayout } from "../components/ProtectedLayout";
 import { LandingPage } from "../pages/LandingPage";
 import { PrivacyPage } from "../pages/PrivacyPage";
+import { TermsPage } from "../pages/TermsPage";
 
 export const router = createBrowserRouter([
   { path: "/", element: <LandingPage /> },
   { path: "/privacy", element: <PrivacyPage /> },
+  { path: "/terms", element: <TermsPage /> },
   { path: "/login", element: <LoginPage /> },
   { path: "/register", element: <RegisterPage /> },
 

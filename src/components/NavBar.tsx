@@ -16,12 +16,13 @@ function NavItem({ to, label }: { to: string; label: string }) {
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "0 14px",
-        borderRadius: 12,
+        padding: "0 16px",
+        borderRadius: 14,
         border: "1px solid var(--border)",
-        background: active ? "rgba(201,115,58,0.16)" : "transparent",
-        color: "var(--text)",
+        background: active ? "linear-gradient(135deg, var(--accent-soft) 0%, rgba(236, 111, 69, 0.1) 100%)" : "transparent",
+        color: active ? "var(--text)" : "var(--muted)",
         fontWeight: active ? 700 : 600,
+        boxShadow: active ? "0 10px 24px rgba(37, 87, 214, 0.08)" : "none",
       }}
     >
       {label}
@@ -56,21 +57,34 @@ export function NavBar() {
         position: "sticky",
         top: 0,
         zIndex: 20,
-        padding: "clamp(8px, 2.4vw, 12px) clamp(10px, 3vw, 14px)",
-        background: "color-mix(in srgb, var(--bg) 80%, transparent)",
-        backdropFilter: "blur(7px)",
+        padding: "clamp(10px, 2.4vw, 16px) clamp(10px, 3vw, 16px)",
+        background: "linear-gradient(180deg, color-mix(in srgb, var(--bg) 78%, transparent) 0%, transparent 100%)",
+        backdropFilter: "blur(10px)",
       }}
     >
-      <Card style={{ padding: 10 }}>
+      <Card
+        style={{
+          padding: 12,
+          background: "color-mix(in srgb, var(--panel) 88%, transparent)",
+          boxShadow: "var(--shadow-strong)",
+        }}
+      >
         <Row style={{ justifyContent: "space-between", alignItems: "center", gap: 10 }}>
           <Row style={{ flex: "1 1 520px", minWidth: 0, gap: 10 }}>
-            <Pill>
+            <Pill
+              style={{
+                minHeight: 42,
+                padding: "0 14px",
+                background: "linear-gradient(135deg, rgba(236, 111, 69, 0.16) 0%, rgba(37, 87, 214, 0.1) 100%)",
+                color: "var(--text)",
+              }}
+            >
               <img
                 src="/icon.png"
                 alt="AuraCue icon"
                 style={{ width: 20, height: 20, borderRadius: 6, objectFit: "cover" }}
               />
-              <span style={{ fontWeight: 800, letterSpacing: "-0.02em", color: "var(--text)" }}>AuraCue</span>
+              <span style={{ fontWeight: 800, letterSpacing: "-0.03em", color: "var(--text)" }}>AuraCue</span>
             </Pill>
 
             {isMobile ? (
@@ -80,9 +94,9 @@ export function NavBar() {
                   display: "inline-flex",
                   alignItems: "center",
                   minWidth: 190,
-                  borderRadius: 14,
+                  borderRadius: 16,
                   border: "1px solid var(--border)",
-                  background: "color-mix(in srgb, var(--panel) 92%, transparent)",
+                  background: "color-mix(in srgb, var(--panel-strong) 90%, transparent)",
                   boxShadow: "var(--shadow)",
                 }}
               >
@@ -96,9 +110,9 @@ export function NavBar() {
                   style={{
                     appearance: "none",
                     WebkitAppearance: "none",
-                    minHeight: 42,
+                    minHeight: 46,
                     width: "100%",
-                    borderRadius: 14,
+                    borderRadius: 16,
                     border: "none",
                     background: "transparent",
                     color: "var(--text)",
