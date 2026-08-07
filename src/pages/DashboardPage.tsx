@@ -1,7 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { listMyPlaylists } from "../features/playlists/playlists.api";
-import { Button, Card, CardTitle, H1, Muted, Page, Pill, Row, Stack } from "../components/ui";
+import {
+  Card,
+  CardTitle,
+  Chip,
+  Eyebrow,
+  H1,
+  Muted,
+  Page,
+  PrimaryButton,
+  Row,
+  SkeletonCard,
+} from "../components/ui";
 import type { PlaylistOut } from "../features/playlists/playlists.types";
 
 const THEME_ICON_RULES: Array<{ icon: string; keywords: string[] }> = [
@@ -71,161 +82,146 @@ export function DashboardPage() {
 
   return (
     <Page>
-      <Card
-        style={{
-          overflow: "hidden",
-          background:
-            "linear-gradient(135deg, color-mix(in srgb, var(--panel-strong) 88%, rgba(37, 87, 214, 0.08)) 0%, color-mix(in srgb, var(--panel-strong) 88%, rgba(236, 111, 69, 0.08)) 100%)",
-        }}
-      >
-        <div style={{ textAlign: "center" }}>
-          <Pill style={{ width: "fit-content", margin: "0 auto 14px" }}>Library overview</Pill>
-          <H1>My Playlists</H1>
-          <Muted style={{ fontSize: "clamp(15px, 3.8vw, 18px)", maxWidth: 620, lineHeight: 1.65, marginInline: "auto" }}>
-            Review saved playlists, reopen drafts you want to export, and jump back into generation without losing
-            the rest of your library.
+      <div className="section-head">
+        <div>
+          <Eyebrow>Library</Eyebrow>
+          <H1 style={{ marginTop: 12 }}>Playlists</H1>
+        </div>
+        <Row style={{ gap: 12 }}>
+          {!isLoading && !error && <Chip>{playlists.length} saved</Chip>}
+          <Link to="/generate">
+            <PrimaryButton>New playlist →</PrimaryButton>
+          </Link>
+        </Row>
+      </div>
+
+      {isLoading && (
+        <div
+          style={{
+            display: "grid",
+            gap: 14,
+            gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 300px), 1fr))",
+          }}
+        >
+          <SkeletonCard lines={3} />
+          <SkeletonCard lines={3} className="fade-in" style={{ ["--d" as string]: "120ms" }} />
+          <SkeletonCard lines={3} className="fade-in" style={{ ["--d" as string]: "240ms" }} />
+        </div>
+      )}
+
+      {error && (
+        <Card dashed style={{ textAlign: "center", padding: "clamp(30px, 6vw, 60px)" }}>
+          <CardTitle>Could not load playlists</CardTitle>
+          <Muted>Try refreshing or login again if your token expired.</Muted>
+        </Card>
+      )}
+
+      {!isLoading && !error && playlists.length === 0 && (
+        <Card dashed style={{ textAlign: "center", padding: "clamp(36px, 7vw, 70px)" }}>
+          <div style={{ fontSize: 40 }}>🎧</div>
+          <CardTitle style={{ marginTop: 12, fontSize: 22 }}>No playlists yet</CardTitle>
+          <Muted style={{ maxWidth: 380, marginInline: "auto", lineHeight: 1.7 }}>
+            Generate your first playlist and save it to see it here.
           </Muted>
-          <div style={{ marginTop: 18 }}>
+          <div style={{ marginTop: 20 }}>
             <Link to="/generate">
-              <Button>+ Generate</Button>
+              <PrimaryButton>Go to Generate →</PrimaryButton>
             </Link>
           </div>
-        </div>
-      </Card>
+        </Card>
+      )}
 
-      <div style={{ marginTop: 18 }}>
-        {isLoading && (
-          <Stack>
-            <Card>
-              <Muted>Loading playlists...</Muted>
-            </Card>
-            <Card>
-              <Muted>Fetching your library...</Muted>
-            </Card>
-          </Stack>
-        )}
+      {!isLoading && !error && playlists.length > 0 && (
+        <div
+          style={{
+            display: "grid",
+            gap: 14,
+            gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 300px), 1fr))",
+          }}
+        >
+          {playlists.map((playlist, index) => {
+            const summary = getPlaylistSummary(playlist);
+            const icon = getPlaylistThemeIcon(playlist);
 
-        {error && (
-          <Card>
-            <CardTitle>Could not load playlists</CardTitle>
-            <Muted>Try refreshing or login again if your token expired.</Muted>
-          </Card>
-        )}
-
-        {!isLoading && !error && playlists.length === 0 && (
-          <Card
-            style={{
-              background:
-                "linear-gradient(180deg, color-mix(in srgb, var(--panel-strong) 90%, rgba(245, 188, 114, 0.1)) 0%, var(--panel) 100%)",
-            }}
-          >
-            <CardTitle>No playlists yet</CardTitle>
-            <Muted>Generate your first playlist and save it to see it here.</Muted>
-            <div style={{ marginTop: 12 }}>
-              <Link to="/generate">
-                <Button>Go to Generate</Button>
-              </Link>
-            </div>
-          </Card>
-        )}
-
-        {!isLoading && !error && playlists.length > 0 && (
-          <div style={{ display: "grid", gap: 16, marginTop: 4 }}>
-            {playlists.map((playlist) => {
-              const summary = getPlaylistSummary(playlist);
-              const icon = getPlaylistThemeIcon(playlist);
-
-              return (
-                <Link key={playlist.id} to={`/playlists/${playlist.id}`} style={{ color: "inherit" }}>
-                  <Card
-                    style={{
-                      padding: 20,
-                      background:
-                        "linear-gradient(180deg, color-mix(in srgb, var(--panel-strong) 94%, rgba(37, 87, 214, 0.05)) 0%, var(--panel) 100%)",
-                    }}
-                  >
-                    <div
+            return (
+              <Link key={playlist.id} to={`/playlists/${playlist.id}`} style={{ color: "inherit", display: "grid" }}>
+                <Card
+                  hover
+                  className="rise"
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 14,
+                    ["--d" as string]: `${Math.min(index * 60, 420)}ms`,
+                  }}
+                >
+                  <Row style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <span
+                      aria-hidden="true"
                       style={{
-                        display: "grid",
-                        gap: 18,
+                        width: 52,
+                        height: 52,
+                        borderRadius: 16,
+                        display: "inline-flex",
                         alignItems: "center",
-                        gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))",
+                        justifyContent: "center",
+                        fontSize: 26,
+                        background: "color-mix(in srgb, var(--primary) 9%, transparent)",
+                        border: "1px solid var(--border)",
                       }}
                     >
-                      <div style={{ minWidth: 0 }}>
-                        <Row style={{ justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
-                          <div style={{ flex: 1, minWidth: 220 }}>
-                            <Row style={{ gap: 10, marginBottom: 14 }}>
-                              <Pill style={{ width: "fit-content" }}>Saved playlist</Pill>
-                              <span
-                                aria-hidden="true"
-                                style={{
-                                  width: 44,
-                                  height: 44,
-                                  borderRadius: 14,
-                                  display: "inline-flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  fontSize: 22,
-                                  background: "color-mix(in srgb, var(--panel-strong) 92%, rgba(236, 111, 69, 0.08))",
-                                  border: "1px solid var(--border)",
-                                }}
-                              >
-                                {icon}
-                              </span>
-                            </Row>
-                            <CardTitle style={{ fontSize: "clamp(24px, 4vw, 30px)" }}>{playlist.name ?? "Untitled"}</CardTitle>
-                            <Muted style={{ marginTop: 8, lineHeight: 1.65 }}>
-                              {playlist.description ?? "No description"}
-                            </Muted>
-                          </div>
-                          <Pill style={{ minWidth: 94, justifyContent: "center" }}>{playlist.total_songs} songs</Pill>
-                        </Row>
+                      {icon}
+                    </span>
+                    <Chip>{playlist.total_songs} songs</Chip>
+                  </Row>
 
-                        <Row style={{ marginTop: 16, gap: 8 }}>
-                          {summary.topAgents.length > 0 ? (
-                            summary.topAgents.map((agent) => (
-                              <Pill key={`${playlist.id}-${agent}`} style={{ minHeight: 30 }}>
-                                {agent}
-                              </Pill>
-                            ))
-                          ) : (
-                            <Pill style={{ minHeight: 30 }}>No agent data</Pill>
-                          )}
-                        </Row>
-                      </div>
+                  <div style={{ flex: 1 }}>
+                    <CardTitle style={{ fontSize: 20 }}>{playlist.name ?? "Untitled"}</CardTitle>
+                    <Muted
+                      style={{
+                        lineHeight: 1.6,
+                        fontSize: 14,
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {playlist.description ?? "No description"}
+                    </Muted>
+                  </div>
 
-                      <div style={{ display: "grid", gap: 10 }}>
-                        <Row style={{ gap: 10, flexWrap: "nowrap", overflowX: "auto" }}>
-                          <Card style={{ padding: 14, minWidth: 130, background: "color-mix(in srgb, var(--panel-strong) 92%, transparent)" }}>
-                            <CardTitle style={{ fontSize: 18 }}>{summary.verifiedCount}</CardTitle>
-                            <Muted style={{ marginTop: 4 }}>Verified tracks</Muted>
-                          </Card>
-                          <Card style={{ padding: 14, minWidth: 130, background: "color-mix(in srgb, var(--panel-strong) 92%, transparent)" }}>
-                            <CardTitle style={{ fontSize: 18 }}>{summary.genreCount}</CardTitle>
-                            <Muted style={{ marginTop: 4 }}>Genres tagged</Muted>
-                          </Card>
-                          <Card style={{ padding: 14, minWidth: 130, background: "color-mix(in srgb, var(--panel-strong) 92%, transparent)" }}>
-                            <CardTitle style={{ fontSize: 18 }}>{summary.topAgents.length || "-"}</CardTitle>
-                            <Muted style={{ marginTop: 4 }}>Lead agents</Muted>
-                          </Card>
-                        </Row>
+                  <div
+                    className="mono"
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      gap: 10,
+                      flexWrap: "wrap",
+                      paddingTop: 12,
+                      borderTop: "1px solid var(--border)",
+                      color: "var(--muted)",
+                    }}
+                  >
+                    <span>{summary.verifiedCount} verified · {summary.genreCount} genres</span>
+                    <span>{playlist.updated_at ? new Date(playlist.updated_at).toLocaleDateString() : "—"}</span>
+                  </div>
 
-                        <Row style={{ justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-                          <Muted style={{ margin: 0 }}>Theme cue: {icon} auto-matched from the playlist text.</Muted>
-                          <Muted style={{ margin: 0 }}>
-                            Updated: {playlist.updated_at ? new Date(playlist.updated_at).toLocaleDateString() : "-"}
-                          </Muted>
-                        </Row>
-                      </div>
-                    </div>
-                  </Card>
-                </Link>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                  {summary.topAgents.length > 0 && (
+                    <Row style={{ gap: 6 }}>
+                      {summary.topAgents.map((agent) => (
+                        <Chip key={`${playlist.id}-${agent}`} tone="warm">
+                          {agent}
+                        </Chip>
+                      ))}
+                    </Row>
+                  )}
+                </Card>
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </Page>
   );
 }

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Button, Card, CardTitle, Divider, H1, Muted, Page, Pill, PrimaryButton, Row, Stack } from "../components/ui";
+import { Button, Chip, Eyebrow, Muted, Page, PrimaryButton, Row } from "../components/ui";
 import { isAuthed } from "../lib/auth";
 
 const AGENTS = [
@@ -8,49 +8,42 @@ const AGENTS = [
     desc: "Scouts fresh tracks that still sit close to your taste profile.",
     signal: "Novelty and adjacency",
     image: "/discovery.png",
-    accent: "rgba(37, 87, 214, 0.16)",
   },
   {
     name: "Genre",
     desc: "Keeps the recommendation set anchored to scenes, subgenres, and style references.",
     signal: "Style and scene",
     image: "/genre.png",
-    accent: "rgba(236, 111, 69, 0.18)",
   },
   {
     name: "Rhythm",
     desc: "Tunes pacing, groove, and momentum around the activity behind the prompt.",
     signal: "Tempo and energy",
     image: "/rythm.png",
-    accent: "rgba(245, 188, 114, 0.2)",
   },
   {
     name: "Language",
     desc: "Filters around language, vocal presence, and lyrical density.",
     signal: "Language and voice",
     image: "/language.png",
-    accent: "rgba(37, 87, 214, 0.12)",
   },
   {
     name: "Popularity",
     desc: "Balances recognisable records with overlooked songs that still fit.",
     signal: "Mainstream vs hidden gems",
     image: "/popularity.png",
-    accent: "rgba(236, 111, 69, 0.12)",
   },
   {
     name: "Mood",
     desc: "Keeps the emotional tone consistent from the first song to the last.",
     signal: "Emotional fit",
     image: "/mood.png",
-    accent: "rgba(122, 162, 255, 0.14)",
   },
   {
     name: "Playlist",
     desc: "Shapes sequence and transitions so the list feels intentionally built.",
     signal: "Pacing and transitions",
     image: "/playlist.png",
-    accent: "rgba(245, 188, 114, 0.16)",
   },
 ] as const;
 
@@ -70,244 +63,290 @@ const WORKFLOW = [
 ];
 
 const METADATA = [
-  {
-    label: "suggested_by",
-    desc: "Shows which agents contributed to each track.",
-  },
-  {
-    label: "verified.status",
-    desc: "Explains whether a Spotify match was found.",
-  },
-  {
-    label: "verified.confidence",
-    desc: "Reports how strong the track match appears to be.",
-  },
-  {
-    label: "verified.spotify_url",
-    desc: "Provides a direct Spotify link when the song is matched.",
-  },
+  { label: "suggested_by", desc: "Shows which agents contributed to each track." },
+  { label: "verified.status", desc: "Explains whether a Spotify match was found." },
+  { label: "verified.confidence", desc: "Reports how strong the track match appears to be." },
+  { label: "verified.spotify_url", desc: "Provides a direct Spotify link when the song is matched." },
 ];
 
 export function LandingPage() {
   const authed = isAuthed();
 
   return (
-    <Page>
-      <section
+    <>
+      {/* Floating minimal header */}
+      <header
         style={{
-          position: "relative",
-          overflow: "hidden",
-          border: "1px solid var(--border)",
-          borderRadius: "calc(var(--radius) + 10px)",
-          padding: "clamp(22px, 5vw, 40px)",
-          background:
-            "linear-gradient(135deg, color-mix(in srgb, var(--panel-strong) 86%, rgba(236, 111, 69, 0.08)) 0%, color-mix(in srgb, var(--panel-strong) 90%, rgba(37, 87, 214, 0.08)) 58%, color-mix(in srgb, var(--panel-strong) 88%, rgba(245, 188, 114, 0.08)) 100%)",
-          boxShadow: "var(--shadow-strong)",
+          position: "sticky",
+          top: 0,
+          zIndex: 30,
+          borderBottom: "1px solid var(--border)",
+          background: "color-mix(in srgb, var(--bg) 82%, transparent)",
+          backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
         }}
       >
         <div
-          aria-hidden="true"
           style={{
-            position: "absolute",
-            inset: "auto -10% -22% auto",
-            width: 360,
-            height: 360,
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(37, 87, 214, 0.14) 0%, transparent 66%)",
-          }}
-        />
-
-        <div
-          style={{
-            display: "grid",
-            gap: 24,
+            width: "min(1160px, 100%)",
+            margin: "0 auto",
+            padding: "14px clamp(16px, 4vw, 32px)",
+            display: "flex",
             alignItems: "center",
-            justifyItems: "center",
-            gridTemplateColumns: "minmax(0, 1fr)",
+            justifyContent: "space-between",
+            gap: 12,
           }}
         >
-          <Stack style={{ gap: 18, justifyItems: "center", textAlign: "center", width: "100%" }}>
-            <Row style={{ justifyContent: "center" }}>
-              <Pill>Collaborative playlist system</Pill>
-              <Pill>Spotify-linked metadata</Pill>
-            </Row>
+          <Link
+            to="/"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 10,
+              color: "var(--text)",
+              fontFamily: "var(--font-display)",
+              fontWeight: 700,
+              fontSize: 17,
+              letterSpacing: "-0.03em",
+            }}
+          >
+            <img src="/icon.png" alt="" style={{ width: 28, height: 28, borderRadius: 8, objectFit: "cover" }} />
+            AuraCue
+          </Link>
 
-            <img
-              src="/logo.png"
-              alt="AuraCue logo"
+          <Row style={{ gap: 8 }}>
+            {authed ? (
+              <Link to="/dashboard">
+                <PrimaryButton className="btn--sm">Open studio</PrimaryButton>
+              </Link>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button className="btn--ghost btn--sm">Log in</Button>
+                </Link>
+                <Link to="/register">
+                  <PrimaryButton className="btn--sm">Start building</PrimaryButton>
+                </Link>
+              </>
+            )}
+          </Row>
+        </div>
+      </header>
+
+      <Page>
+        {/* ---- Hero: text left, art right ---- */}
+        <section
+          style={{
+            display: "grid",
+            gap: "clamp(28px, 5vw, 56px)",
+            alignItems: "center",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 340px), 1fr))",
+            padding: "clamp(24px, 5vw, 64px) 0",
+          }}
+        >
+          <div>
+            <Eyebrow className="rise">AI playlist studio</Eyebrow>
+            <h1
+              className="display rise"
               style={{
-                width: "clamp(170px, 24vw, 250px)",
-                height: "auto",
-                display: "block",
-                margin: "0 auto",
-                filter: "drop-shadow(0 18px 28px rgba(21, 27, 42, 0.16))",
+                fontSize: "clamp(2.6rem, 6.5vw, 4.6rem)",
+                margin: "18px 0 0",
+                ["--d" as string]: "80ms",
               }}
-            />
+            >
+              Prompt the vibe.
+              <br />
+              <span className="grad-text">Seven agents</span>
+              <br />
+              build the playlist.
+            </h1>
+            <Muted
+              className="rise"
+              style={{
+                fontSize: "clamp(16px, 2vw, 19px)",
+                lineHeight: 1.7,
+                maxWidth: 520,
+                marginTop: 20,
+                ["--d" as string]: "160ms",
+              }}
+            >
+              AuraCue turns a short mood brief into a complete playlist using specialized agents for
+              discovery, genre, rhythm, language, popularity, mood, and sequencing.
+            </Muted>
 
-            <div style={{ maxWidth: 760, marginInline: "auto" }}>
-              <H1>Prompt the vibe. Let the agent crew build the playlist.</H1>
-              <Muted style={{ fontSize: "clamp(17px, 2.3vw, 21px)", lineHeight: 1.65, marginTop: 16 }}>
-                AuraCue turns a short mood brief into a complete playlist using specialized agents for discovery,
-                genre, rhythm, language, popularity, mood, and sequencing.
-              </Muted>
-            </div>
-
-            <Row style={{ justifyContent: "center" }}>
+            <Row className="rise" style={{ marginTop: 28, gap: 12, ["--d" as string]: "240ms" }}>
               {authed ? (
                 <Link to="/dashboard">
-                  <PrimaryButton>Open Dashboard</PrimaryButton>
+                  <PrimaryButton>Open studio →</PrimaryButton>
                 </Link>
               ) : (
                 <>
                   <Link to="/register">
-                    <PrimaryButton>Start Building</PrimaryButton>
+                    <PrimaryButton>Start building →</PrimaryButton>
                   </Link>
                   <Link to="/login">
-                    <Button>Log In</Button>
+                    <Button className="btn--ghost">Log in</Button>
                   </Link>
                 </>
               )}
             </Row>
 
+            {/* Inline hairline stats instead of stat cards */}
             <div
+              className="rise"
               style={{
-                display: "grid",
-                gap: 12,
-                gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
-                maxWidth: 760,
-                width: "100%",
+                display: "flex",
+                gap: "clamp(18px, 3vw, 36px)",
+                marginTop: 40,
+                paddingTop: 22,
+                borderTop: "1px solid var(--border)",
+                flexWrap: "wrap",
+                ["--d" as string]: "320ms",
               }}
             >
-              <Card style={{ padding: 16, background: "color-mix(in srgb, var(--panel) 92%, transparent)" }}>
-                <CardTitle style={{ fontSize: 28 }}>7</CardTitle>
-                <Muted style={{ marginTop: 6 }}>Specialized agents collaborating on every brief.</Muted>
-              </Card>
-              <Card style={{ padding: 16, background: "color-mix(in srgb, var(--panel) 92%, transparent)" }}>
-                <CardTitle style={{ fontSize: 28 }}>35-50</CardTitle>
-                <Muted style={{ marginTop: 6 }}>Songs per generated draft with verification metadata.</Muted>
-              </Card>
-              <Card style={{ padding: 16, background: "color-mix(in srgb, var(--panel) 92%, transparent)" }}>
-                <CardTitle style={{ fontSize: 28 }}>100%</CardTitle>
-                <Muted style={{ marginTop: 6 }}>Preserved functionality for generation, saving, and export.</Muted>
-              </Card>
+              {[
+                ["07", "specialist agents"],
+                ["35–50", "songs per draft"],
+                ["1 click", "Spotify export"],
+              ].map(([num, label]) => (
+                <div key={label}>
+                  <div className="display" style={{ fontSize: 26 }}>{num}</div>
+                  <div className="mono" style={{ color: "var(--muted)", marginTop: 4 }}>{label}</div>
+                </div>
+              ))}
             </div>
-          </Stack>
-        </div>
-      </section>
+          </div>
 
-      <section
-        style={{
-          marginTop: 20,
-          display: "grid",
-          gap: 16,
-          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))",
-        }}
-      >
-        {WORKFLOW.map((step, index) => (
-          <Card key={step.title}>
-            <Pill style={{ width: "fit-content", marginBottom: 14 }}>0{index + 1}</Pill>
-            <CardTitle>{step.title}</CardTitle>
-            <Muted style={{ lineHeight: 1.65 }}>{step.body}</Muted>
-          </Card>
-        ))}
-      </section>
+          <div className="hero-art scale-in" style={{ ["--d" as string]: "180ms" }}>
+            <div className="hero-art-frame">
+              <img src="/logo.png" alt="AuraCue logo" />
+            </div>
+            <img src="/mood.png" alt="" aria-hidden="true" className="orbit" style={{ top: "4%", left: "8%", animationDelay: "-1s" }} />
+            <img src="/rythm.png" alt="" aria-hidden="true" className="orbit" style={{ top: "18%", right: "2%", animationDelay: "-3s" }} />
+            <img src="/discovery.png" alt="" aria-hidden="true" className="orbit" style={{ bottom: "10%", left: "2%", animationDelay: "-2s" }} />
+            <img src="/genre.png" alt="" aria-hidden="true" className="orbit" style={{ bottom: "0%", right: "12%", animationDelay: "-4.5s" }} />
+          </div>
+        </section>
 
-      <section style={{ marginTop: 20 }}>
-        <Card style={{ padding: "clamp(18px, 4vw, 28px)" }}>
-          <Row style={{ justifyContent: "space-between", alignItems: "flex-end", marginBottom: 8 }}>
+        {/* ---- Workflow: numbered horizontal steps ---- */}
+        <section style={{ marginTop: "clamp(30px, 6vw, 70px)" }}>
+          <div className="section-head">
             <div>
-              <CardTitle style={{ fontSize: "clamp(24px, 4vw, 34px)" }}>Meet the agent team</CardTitle>
-              <Muted style={{ maxWidth: 620, lineHeight: 1.65 }}>
-                One team, seven roles. Each image now maps directly to a specialist agent so the system is easy to
-                understand without repeating the same explanation across the page.
-              </Muted>
+              <Eyebrow>How it works</Eyebrow>
+              <h2 className="display" style={{ fontSize: "clamp(24px, 3.4vw, 34px)", marginTop: 12 }}>
+                From one sentence to a full set
+              </h2>
             </div>
-            <Pill>7 visual identities</Pill>
-          </Row>
-
-          <Divider />
+          </div>
 
           <div
             style={{
-              display: "flex",
-              flexWrap: "wrap",
-              justifyContent: "center",
-              gap: 16,
+              display: "grid",
+              gap: "clamp(16px, 3vw, 28px)",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))",
             }}
           >
-            {AGENTS.map((agent) => (
-              <Card
-                key={agent.name}
-                style={{
-                  width: "min(100%, 310px)",
-                  flex: "0 1 310px",
-                  padding: 14,
-                  background: `linear-gradient(180deg, ${agent.accent} 0%, color-mix(in srgb, var(--panel-strong) 94%, transparent) 100%)`,
-                }}
-              >
-                <img
-                  src={agent.image}
-                  alt={`${agent.name} agent artwork`}
-                  style={{
-                    width: "100%",
-                    aspectRatio: "1 / 1",
-                    objectFit: "cover",
-                    borderRadius: 22,
-                    border: "1px solid var(--border)",
-                    marginBottom: 14,
-                  }}
-                />
-                <Row style={{ justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
-                  <CardTitle>{agent.name}</CardTitle>
-                  <Pill style={{ minHeight: 30 }}>{agent.signal}</Pill>
-                </Row>
-                <Muted style={{ marginTop: 10, lineHeight: 1.65 }}>{agent.desc}</Muted>
-              </Card>
-            ))}
-          </div>
-        </Card>
-      </section>
-
-      <section
-        style={{
-          marginTop: 20,
-          display: "grid",
-          gap: 16,
-          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
-        }}
-      >
-        <Card>
-          <CardTitle>Metadata transparency</CardTitle>
-          <Divider />
-          <Stack>
-            {METADATA.map((item) => (
-              <div key={item.label}>
-                <b>{item.label}</b>
-                <Muted>{item.desc}</Muted>
+            {WORKFLOW.map((step, index) => (
+              <div key={step.title} className="rise" style={{ ["--d" as string]: `${index * 90}ms` }}>
+                <div className="ghost-num">0{index + 1}</div>
+                <h3 style={{ margin: "14px 0 0", fontSize: 19 }}>{step.title}</h3>
+                <Muted style={{ lineHeight: 1.7 }}>{step.body}</Muted>
               </div>
             ))}
-          </Stack>
-        </Card>
+          </div>
+        </section>
 
-        <Card
+        {/* ---- Agent team: bento grid ---- */}
+        <section style={{ marginTop: "clamp(40px, 7vw, 90px)" }}>
+          <div className="section-head">
+            <div>
+              <Eyebrow>The crew</Eyebrow>
+              <h2 className="display" style={{ fontSize: "clamp(24px, 3.4vw, 34px)", marginTop: 12 }}>
+                Meet the agent team
+              </h2>
+            </div>
+            <Chip>7 specialists</Chip>
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gap: 14,
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 230px), 1fr))",
+              gridAutoRows: "auto",
+            }}
+          >
+            {AGENTS.map((agent, index) => (
+              <article
+                key={agent.name}
+                className={index === 0 ? "agent-tile agent-tile--feature rise" : "agent-tile rise"}
+                style={{ ["--d" as string]: `${index * 60}ms` }}
+              >
+                <img src={agent.image} alt={`${agent.name} agent artwork`} />
+                <div>
+                  <Row style={{ justifyContent: "space-between", gap: 8 }}>
+                    <h3 style={{ margin: 0, fontSize: index === 0 ? 24 : 17 }}>{agent.name}</h3>
+                    <Chip tone="warm">{agent.signal}</Chip>
+                  </Row>
+                  <Muted style={{ lineHeight: 1.65, fontSize: 14 }}>{agent.desc}</Muted>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {/* ---- Metadata + notice footer band ---- */}
+        <section
           style={{
-            background:
-              "linear-gradient(135deg, color-mix(in srgb, var(--panel-strong) 84%, rgba(37, 87, 214, 0.08)) 0%, color-mix(in srgb, var(--panel-strong) 86%, rgba(236, 111, 69, 0.08)) 100%)",
+            marginTop: "clamp(40px, 7vw, 90px)",
+            paddingTop: 28,
+            borderTop: "1px solid var(--border)",
+            display: "grid",
+            gap: "clamp(24px, 4vw, 48px)",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
           }}
         >
-          <CardTitle>Spotify notice</CardTitle>
-          <Divider />
-          <Muted style={{ lineHeight: 1.7 }}>
-            Spotify is a trademark of Spotify AB. AuraCue uses Spotify matching and export capabilities, but it is not
-            affiliated with or endorsed by Spotify.
-          </Muted>
-          <Muted style={{ lineHeight: 1.7 }}>
-            <Link to="/privacy">Read the Privacy Policy</Link>
-            {" · "}
-            <Link to="/terms">Read the Terms of Service</Link>
-          </Muted>
-        </Card>
-      </section>
-    </Page>
+          <div>
+            <Eyebrow>Transparency</Eyebrow>
+            <h2 className="display" style={{ fontSize: 24, marginTop: 12 }}>
+              Every track explains itself
+            </h2>
+            <div style={{ marginTop: 18, display: "grid", gap: 0 }}>
+              {METADATA.map((item, index) => (
+                <div
+                  key={item.label}
+                  style={{
+                    display: "flex",
+                    gap: 14,
+                    alignItems: "baseline",
+                    flexWrap: "wrap",
+                    padding: "12px 0",
+                    borderTop: index === 0 ? "none" : "1px solid var(--border)",
+                  }}
+                >
+                  <code style={{ flex: "0 0 auto" }}>{item.label}</code>
+                  <Muted style={{ margin: 0, flex: "1 1 200px" }}>{item.desc}</Muted>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <Eyebrow>Spotify notice</Eyebrow>
+            <Muted style={{ lineHeight: 1.75, marginTop: 14 }}>
+              Spotify is a trademark of Spotify AB. AuraCue uses Spotify matching and export
+              capabilities, but it is not affiliated with or endorsed by Spotify.
+            </Muted>
+            <Row style={{ marginTop: 18, gap: 16 }}>
+              <Link to="/privacy" style={{ fontWeight: 600, fontSize: 14 }}>Privacy Policy</Link>
+              <Link to="/terms" style={{ fontWeight: 600, fontSize: 14 }}>Terms of Service</Link>
+            </Row>
+            <Muted className="mono" style={{ marginTop: 26, fontSize: 12 }}>
+              © {new Date().getFullYear()} AuraCue
+            </Muted>
+          </div>
+        </section>
+      </Page>
+    </>
   );
 }

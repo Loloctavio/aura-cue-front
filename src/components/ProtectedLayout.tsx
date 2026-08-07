@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { NavBar } from "./NavBar";
+import { Sidebar, TabBar } from "./NavBar";
 
 export function ProtectedLayout() {
   const location = useLocation();
@@ -16,9 +16,12 @@ export function ProtectedLayout() {
   }, [location.pathname, location.search, navigate]);
 
   return (
-    <>
-      <NavBar />
-      <Outlet />
-    </>
+    <div className="shell">
+      <Sidebar />
+      <main className="shell-main">
+        <Outlet />
+      </main>
+      <TabBar />
+    </div>
   );
 }

@@ -8,14 +8,19 @@ type SpanProps = React.HTMLAttributes<HTMLSpanElement>;
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
 
-export function Page({ children, style, ...props }: DivProps) {
+function cx(...classes: Array<string | false | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
+
+export function Page({ children, style, className, ...props }: DivProps) {
   return (
     <div
       {...props}
+      className={cx("fade-in", className)}
       style={{
-        width: "min(1200px, 100%)",
-        margin: "clamp(16px, 3vw, 28px) auto clamp(30px, 5vw, 48px)",
-        padding: "0 clamp(14px, 4vw, 24px)",
+        width: "min(1160px, 100%)",
+        margin: "0 auto",
+        padding: "clamp(22px, 4vw, 44px) clamp(16px, 4vw, 32px) clamp(30px, 5vw, 48px)",
         ...(style ?? {}),
       }}
     >
@@ -38,7 +43,7 @@ export function Row({ children, style, ...props }: DivProps) {
       {...props}
       style={{
         display: "flex",
-        gap: 14,
+        gap: 12,
         flexWrap: "wrap",
         alignItems: "center",
         ...(style ?? {}),
@@ -49,19 +54,24 @@ export function Row({ children, style, ...props }: DivProps) {
   );
 }
 
-export function Card({ children, style, ...props }: DivProps) {
+export function Card({
+  children,
+  className,
+  hover,
+  dashed,
+  tinted,
+  ...props
+}: DivProps & { hover?: boolean; dashed?: boolean; tinted?: boolean }) {
   return (
     <div
       {...props}
-      style={{
-        background: "var(--panel)",
-        border: "1px solid var(--border)",
-        borderRadius: "var(--radius)",
-        padding: "clamp(16px, 3vw, 24px)",
-        boxShadow: "var(--shadow)",
-        backdropFilter: "blur(18px)",
-        ...(style ?? {}),
-      }}
+      className={cx(
+        "card",
+        hover && "card--hover",
+        dashed && "card--dashed",
+        tinted && "card--tinted",
+        className,
+      )}
     >
       {children}
     </div>
@@ -70,26 +80,33 @@ export function Card({ children, style, ...props }: DivProps) {
 
 export function CardTitle({ children, style, ...props }: H2Props) {
   return (
-    <h2 {...props} style={{ margin: 0, fontSize: 20, lineHeight: 1.15, ...(style ?? {}) }}>
+    <h2
+      {...props}
+      style={{ margin: 0, fontSize: 19, fontWeight: 700, lineHeight: 1.2, ...(style ?? {}) }}
+    >
       {children}
     </h2>
   );
 }
 
-export function H1({ children, style, ...props }: H1Props) {
+export function H1({ children, className, style, ...props }: H1Props) {
   return (
     <h1
       {...props}
-      style={{
-        margin: 0,
-        fontSize: "clamp(2.3rem, 8vw, 4.4rem)",
-        lineHeight: 0.96,
-        fontWeight: 800,
-        ...(style ?? {}),
-      }}
+      className={cx("display", className)}
+      style={{ fontSize: "clamp(2.1rem, 6vw, 3.6rem)", ...(style ?? {}) }}
     >
       {children}
     </h1>
+  );
+}
+
+/** Small uppercase mono section label with a leading rule. */
+export function Eyebrow({ children, className, ...props }: PProps) {
+  return (
+    <p {...props} className={cx("eyebrow", className)}>
+      {children}
+    </p>
   );
 }
 
@@ -101,195 +118,80 @@ export function Muted({ children, style, ...props }: PProps) {
   );
 }
 
-export function Divider({ style, ...props }: DivProps) {
+export function Divider({ className, ...props }: DivProps) {
+  return <div {...props} className={cx("hairline", className)} />;
+}
+
+/** Uppercase mono label rendered above a form field. */
+export function FieldLabel({ children, className, ...props }: React.LabelHTMLAttributes<HTMLLabelElement>) {
   return (
-    <div
-      {...props}
-      style={{ height: 1, background: "var(--border)", margin: "16px 0", ...(style ?? {}) }}
-    />
+    <label {...props} className={cx("field-label", className)}>
+      {children}
+    </label>
   );
 }
 
-export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
-  const { style, onFocus, onBlur, ...rest } = props;
-
-  return (
-    <input
-      {...rest}
-      style={{
-        width: "100%",
-        minHeight: 50,
-        padding: "0 16px",
-        borderRadius: 16,
-        border: "1px solid var(--border)",
-        background: "var(--input-bg)",
-        color: "var(--text)",
-        outline: "none",
-        fontSize: 15,
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25)",
-        transition: "box-shadow 160ms ease, border-color 160ms ease, transform 160ms ease",
-        ...(style ?? {}),
-      }}
-      onFocus={(e) => {
-        e.currentTarget.style.borderColor = "var(--primary)";
-        e.currentTarget.style.boxShadow = "0 0 0 4px var(--ring)";
-        onFocus?.(e);
-      }}
-      onBlur={(e) => {
-        e.currentTarget.style.borderColor = "var(--border)";
-        e.currentTarget.style.boxShadow = "0 0 0 0 transparent";
-        onBlur?.(e);
-      }}
-    />
-  );
+export function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
+  return <input {...props} className={cx("field", className)} />;
 }
 
-export function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  const { style, onFocus, onBlur, ...rest } = props;
-
-  return (
-    <textarea
-      {...rest}
-      style={{
-        width: "100%",
-        padding: "14px 16px",
-        borderRadius: 16,
-        border: "1px solid var(--border)",
-        background: "var(--input-bg)",
-        color: "var(--text)",
-        outline: "none",
-        resize: "vertical",
-        fontSize: 15,
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25)",
-        transition: "box-shadow 160ms ease, border-color 160ms ease, transform 160ms ease",
-        ...(style ?? {}),
-      }}
-      onFocus={(e) => {
-        e.currentTarget.style.borderColor = "var(--primary)";
-        e.currentTarget.style.boxShadow = "0 0 0 4px var(--ring)";
-        onFocus?.(e);
-      }}
-      onBlur={(e) => {
-        e.currentTarget.style.borderColor = "var(--border)";
-        e.currentTarget.style.boxShadow = "0 0 0 0 transparent";
-        onBlur?.(e);
-      }}
-    />
-  );
+export function Textarea({ className, ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return <textarea {...props} className={cx("field", className)} />;
 }
 
-export function Button({ children, style, ...props }: ButtonProps) {
-  const disabled = props.disabled;
+export function Button({ children, className, ...props }: ButtonProps) {
   return (
-    <button
-      {...props}
-      style={{
-        minHeight: 46,
-        padding: "0 18px",
-        borderRadius: 16,
-        border: "1px solid var(--border)",
-        background: disabled ? "rgba(0,0,0,0.05)" : "color-mix(in srgb, var(--panel-strong) 88%, transparent)",
-        color: "var(--text)",
-        cursor: disabled ? "not-allowed" : "pointer",
-        fontSize: 15,
-        fontWeight: 600,
-        boxShadow: disabled ? "none" : "0 10px 24px rgba(20, 26, 42, 0.06)",
-        transition: "transform 120ms ease, border-color 140ms ease, box-shadow 140ms ease",
-        ...(style ?? {}),
-      }}
-      onMouseDown={(e) => {
-        e.currentTarget.style.transform = "translateY(1px)";
-      }}
-      onMouseUp={(e) => {
-        e.currentTarget.style.transform = "translateY(0)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "translateY(0)";
-      }}
-    >
+    <button {...props} className={cx("btn", className)}>
       {children}
     </button>
   );
 }
 
-export function PrimaryButton({ children, style, ...props }: ButtonProps) {
-  const disabled = props.disabled;
+export function PrimaryButton({ children, className, ...props }: ButtonProps) {
   return (
-    <button
-      {...props}
-      style={{
-        minHeight: 46,
-        padding: "0 20px",
-        borderRadius: 16,
-        border: "1px solid transparent",
-        background: disabled ? "rgba(0,0,0,0.05)" : "linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%)",
-        color: disabled ? "var(--muted)" : "var(--primary-contrast)",
-        cursor: disabled ? "not-allowed" : "pointer",
-        fontSize: 15,
-        fontWeight: 700,
-        boxShadow: disabled ? "none" : "0 16px 28px rgba(236, 111, 69, 0.25)",
-        transition: "filter 140ms ease, transform 120ms ease, box-shadow 140ms ease",
-        ...(style ?? {}),
-      }}
-      onMouseDown={(e) => {
-        e.currentTarget.style.transform = "translateY(1px)";
-      }}
-      onMouseUp={(e) => {
-        e.currentTarget.style.transform = "translateY(0)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "translateY(0)";
-      }}
-    >
+    <button {...props} className={cx("btn", "btn--primary", className)}>
       {children}
     </button>
   );
 }
 
-export function DangerButton({ children, style, ...props }: ButtonProps) {
-  const disabled = props.disabled;
+export function GhostButton({ children, className, ...props }: ButtonProps) {
   return (
-    <button
-      {...props}
-      style={{
-        minHeight: 46,
-        padding: "0 18px",
-        borderRadius: 16,
-        border: "1px solid rgba(255, 0, 0, 0.2)",
-        background: disabled ? "rgba(255,0,0,0.05)" : "rgba(255,0,0,0.08)",
-        color: "var(--danger)",
-        cursor: disabled ? "not-allowed" : "pointer",
-        fontSize: 15,
-        fontWeight: 700,
-        boxShadow: disabled ? "none" : "0 10px 22px rgba(203, 70, 61, 0.1)",
-        ...(style ?? {}),
-      }}
-    >
+    <button {...props} className={cx("btn", "btn--ghost", className)}>
       {children}
     </button>
   );
 }
 
-export function Pill({ children, style, ...props }: SpanProps) {
+export function DangerButton({ children, className, ...props }: ButtonProps) {
+  return (
+    <button {...props} className={cx("btn", "btn--danger", className)}>
+      {children}
+    </button>
+  );
+}
+
+/** Mono metadata chip. tone: "ok" (accent) | "warm" (primary) | default muted. */
+export function Chip({
+  children,
+  className,
+  tone,
+  ...props
+}: SpanProps & { tone?: "ok" | "warm" }) {
   return (
     <span
       {...props}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 8,
-        minHeight: 34,
-        padding: "0 12px",
-        borderRadius: 999,
-        border: "1px solid var(--border)",
-        background: "color-mix(in srgb, var(--panel-strong) 78%, transparent)",
-        color: "var(--muted)",
-        fontSize: 13,
-        fontWeight: 700,
-        letterSpacing: "0.01em",
-        ...(style ?? {}),
-      }}
+      className={cx("chip", tone === "ok" && "chip--ok", tone === "warm" && "chip--warm", className)}
     >
+      {children}
+    </span>
+  );
+}
+
+/** Kept for legacy pages; renders as a Chip. */
+export function Pill({ children, className, ...props }: SpanProps) {
+  return (
+    <span {...props} className={cx("chip", className)}>
       {children}
     </span>
   );
@@ -300,5 +202,47 @@ export function ErrorText({ children, style, ...props }: React.HTMLAttributes<HT
     <small {...props} style={{ color: "var(--danger)", fontSize: 13, ...(style ?? {}) }}>
       {children}
     </small>
+  );
+}
+
+/** Small circular loader, sized to the surrounding text. */
+export function Spinner({ className, ...props }: SpanProps) {
+  return <span {...props} role="status" aria-label="Loading" className={cx("spinner", className)} />;
+}
+
+/** Shimmering placeholder block. Size it with the style prop. */
+export function Skeleton({ className, style, ...props }: DivProps) {
+  return (
+    <div
+      {...props}
+      aria-hidden="true"
+      className={cx("skeleton", className)}
+      style={{ height: 14, ...(style ?? {}) }}
+    />
+  );
+}
+
+/** Animated music equalizer bars — the app's signature loader. */
+export function Equalizer({ small, className, ...props }: SpanProps & { small?: boolean }) {
+  return (
+    <span {...props} role="status" aria-label="Loading" className={cx("eq", small && "eq--sm", className)}>
+      <i />
+      <i />
+      <i />
+      <i />
+      <i />
+    </span>
+  );
+}
+
+/** Card-shaped skeleton used while a page section loads. */
+export function SkeletonCard({ lines = 3, style, ...props }: DivProps & { lines?: number }) {
+  return (
+    <Card {...props} style={style}>
+      <Skeleton style={{ width: "38%", height: 20, marginBottom: 14 }} />
+      {Array.from({ length: lines }, (_, i) => (
+        <Skeleton key={i} style={{ width: `${88 - i * 14}%`, height: 12, marginBottom: 10 }} />
+      ))}
+    </Card>
   );
 }

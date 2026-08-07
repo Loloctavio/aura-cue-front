@@ -4,7 +4,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { login } from "../features/auth/auth.api";
 import { setToken } from "../lib/auth";
-import { Card, H1, Muted, Page, PrimaryButton, Input, ErrorText, Stack, Row, Pill } from "../components/ui";
+import { ErrorText, Eyebrow, FieldLabel, Input, Muted, PrimaryButton, Spinner, Stack } from "../components/ui";
 
 const schema = z.object({
   gmail: z.string().email("Invalid email"),
@@ -34,113 +34,108 @@ export function LoginPage() {
   };
 
   return (
-    <Page style={{ minHeight: "calc(100vh - 20px)", display: "grid", placeItems: "center" }}>
-      <Link
-        to="/"
-        aria-label="Back to home"
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 380px), 1fr))",
+      }}
+    >
+      {/* ---- Brand panel ---- */}
+      <div
         style={{
-          position: "fixed",
-          top: 18,
-          left: 18,
-          width: 44,
-          height: 44,
-          borderRadius: 999,
-          border: "1px solid var(--border)",
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 20,
-          fontWeight: 700,
-          background: "var(--panel)",
-          color: "var(--text)",
-          boxShadow: "var(--shadow-strong)",
-          zIndex: 30,
+          position: "relative",
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          gap: 40,
+          padding: "clamp(24px, 4vw, 48px)",
+          background:
+            "linear-gradient(150deg, color-mix(in srgb, var(--panel-strong) 82%, var(--primary)) 0%, color-mix(in srgb, var(--panel-strong) 88%, var(--accent)) 100%)",
+          borderRight: "1px solid var(--border)",
         }}
       >
-        ←
-      </Link>
-      <div style={{ width: "min(980px, 100%)" }}>
-        <div
+        <Link
+          to="/"
           style={{
-            display: "grid",
-            gap: 18,
-            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
-            alignItems: "stretch",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 10,
+            color: "var(--text)",
+            fontFamily: "var(--font-display)",
+            fontWeight: 700,
+            fontSize: 17,
+            letterSpacing: "-0.03em",
           }}
         >
-          <Card
-            style={{
-              padding: "clamp(22px, 4vw, 34px)",
-              background:
-                "linear-gradient(135deg, color-mix(in srgb, var(--panel-strong) 86%, rgba(37, 87, 214, 0.1)) 0%, color-mix(in srgb, var(--panel-strong) 86%, rgba(236, 111, 69, 0.1)) 100%)",
-            }}
-          >
-            <img
-              src="/logo.png"
-              alt="AuraCue logo"
-              style={{
-                width: "clamp(120px, 24vw, 190px)",
-                height: "auto",
-                display: "block",
-                marginBottom: 12,
-              }}
-            />
-            <Muted style={{ fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase" }}>Return to your queue</Muted>
-            <H1 style={{ marginTop: 10 }}>Welcome back</H1>
-            <Muted style={{ fontSize: "clamp(16px, 4.3vw, 20px)", lineHeight: 1.7 }}>
-              Open your saved playlists, generate a new draft, or export directly to Spotify from the same workspace.
-            </Muted>
-            <Card style={{ marginTop: 22, padding: 18 }}>
-              <Muted style={{ marginTop: 0 }}>Inside your account</Muted>
-              <Stack style={{ gap: 10, marginTop: 12 }}>
-                <Row>
-                  <span style={{ fontSize: 22 }}>01</span>
-                  <Muted style={{ margin: 0 }}>Generate playlists from a single prompt.</Muted>
-                </Row>
-                <Row>
-                  <span style={{ fontSize: 22 }}>02</span>
-                  <Muted style={{ margin: 0 }}>Inspect which agents suggested each track.</Muted>
-                </Row>
-                <Row>
-                  <span style={{ fontSize: 22 }}>03</span>
-                  <Muted style={{ margin: 0 }}>Save and export to Spotify when you are ready.</Muted>
-                </Row>
-              </Stack>
-            </Card>
-          </Card>
+          <img src="/icon.png" alt="" style={{ width: 28, height: 28, borderRadius: 8, objectFit: "cover" }} />
+          AuraCue
+        </Link>
 
-          <Card style={{ padding: "clamp(22px, 4vw, 34px)" }}>
-            <Pill style={{ width: "fit-content", marginBottom: 16 }}>Log in</Pill>
-            <H1 style={{ fontSize: "clamp(2rem, 6vw, 3.3rem)" }}>Account access</H1>
-            <Muted style={{ fontSize: 17, lineHeight: 1.65 }}>Use the same credentials you registered with.</Muted>
+        <div className="rise">
+          <img
+            src="/logo.png"
+            alt=""
+            aria-hidden="true"
+            className="float-slow"
+            style={{ width: "clamp(110px, 14vw, 160px)", height: "auto", marginBottom: 26 }}
+          />
+          <h1 className="display" style={{ fontSize: "clamp(2.2rem, 4vw, 3.4rem)", maxWidth: 480 }}>
+            Your queue
+            <br />
+            <span className="grad-text">missed you.</span>
+          </h1>
+          <Muted style={{ fontSize: 17, lineHeight: 1.7, maxWidth: 420, marginTop: 16 }}>
+            Open saved playlists, generate a new draft, or export directly to Spotify from the same
+            workspace.
+          </Muted>
+        </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} style={{ marginTop: 24 }}>
-              <Stack style={{ gap: 14 }}>
-                <div>
-                  <Input placeholder="Email" autoComplete="email" {...register("gmail")} />
-                  {errors.gmail && <ErrorText>{errors.gmail.message}</ErrorText>}
-                </div>
-
-                <div>
-                  <Input placeholder="Password" type="password" autoComplete="current-password" {...register("password")} />
-                  {errors.password && <ErrorText>{errors.password.message}</ErrorText>}
-                </div>
-
-                {"root" in errors && <ErrorText>{(errors as any).root?.message}</ErrorText>}
-
-                <Row style={{ marginTop: 6 }}>
-                  <PrimaryButton disabled={isSubmitting} type="submit">
-                    {isSubmitting ? "Entering..." : "Login"}
-                  </PrimaryButton>
-                  <Link to="/register" style={{ alignSelf: "center", fontWeight: 700 }}>
-                    Create account
-                  </Link>
-                </Row>
-              </Stack>
-            </form>
-          </Card>
+        <div className="mono rise" style={{ color: "var(--muted)", display: "grid", gap: 8, ["--d" as string]: "140ms" }}>
+          <span>01 · generate playlists from a single prompt</span>
+          <span>02 · inspect which agents suggested each track</span>
+          <span>03 · save and export to Spotify when ready</span>
         </div>
       </div>
-    </Page>
+
+      {/* ---- Form panel ---- */}
+      <div style={{ display: "grid", placeItems: "center", padding: "clamp(24px, 4vw, 48px)" }}>
+        <div className="rise" style={{ width: "min(400px, 100%)", ["--d" as string]: "100ms" }}>
+          <Eyebrow>Welcome back</Eyebrow>
+          <h1 className="display" style={{ fontSize: "clamp(1.9rem, 3.4vw, 2.6rem)", marginTop: 14 }}>
+            Log in
+          </h1>
+          <Muted style={{ lineHeight: 1.65 }}>Use the same credentials you registered with.</Muted>
+
+          <form onSubmit={handleSubmit(onSubmit)} style={{ marginTop: 28 }}>
+            <Stack style={{ gap: 18 }}>
+              <div>
+                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <Input id="email" placeholder="you@example.com" autoComplete="email" {...register("gmail")} />
+                {errors.gmail && <ErrorText>{errors.gmail.message}</ErrorText>}
+              </div>
+
+              <div>
+                <FieldLabel htmlFor="password">Password</FieldLabel>
+                <Input id="password" placeholder="••••••••" type="password" autoComplete="current-password" {...register("password")} />
+                {errors.password && <ErrorText>{errors.password.message}</ErrorText>}
+              </div>
+
+              {"root" in errors && <ErrorText>{(errors as any).root?.message}</ErrorText>}
+
+              <PrimaryButton disabled={isSubmitting} type="submit" style={{ width: "100%" }}>
+                {isSubmitting && <Spinner />}
+                {isSubmitting ? "Entering..." : "Log in →"}
+              </PrimaryButton>
+
+              <Muted style={{ margin: 0, textAlign: "center", fontSize: 14 }}>
+                No account yet? <Link to="/register" style={{ fontWeight: 700 }}>Create one</Link>
+              </Muted>
+            </Stack>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 }

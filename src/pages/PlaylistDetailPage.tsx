@@ -7,28 +7,39 @@ import {
   Button,
   Card,
   CardTitle,
+  Chip,
   DangerButton,
+  Eyebrow,
+  FieldLabel,
   H1,
   Input,
   Muted,
   Page,
   PrimaryButton,
   Row,
+  Skeleton,
+  SkeletonCard,
+  Spinner,
   Stack,
   Textarea,
-  Pill,
-  Divider,
 } from "../components/ui";
 
 function songLabel(song: Song) {
   const artist = (song.artist ?? "Unknown").toString();
   const track = (song.track ?? "Unknown").toString();
-  return `${artist} - ${track}`;
+  return `${artist} — ${track}`;
+}
+
+function agentsFull(song: Song) {
+  if (!Array.isArray(song.suggested_by) || song.suggested_by.length === 0) return "N/A";
+  return song.suggested_by.join(", ");
 }
 
 function agentsLabel(song: Song) {
-  if (!Array.isArray(song.suggested_by) || song.suggested_by.length === 0) return "N/A";
-  return song.suggested_by.join(", ");
+  const agents = Array.isArray(song.suggested_by) ? song.suggested_by : [];
+  if (agents.length === 0) return "N/A";
+  if (agents.length <= 2) return agents.join(", ");
+  return `${agents[0]} +${agents.length - 1}`;
 }
 
 function verificationStatus(song: Song) {
@@ -121,8 +132,42 @@ export function PlaylistDetailPage() {
     },
   });
 
-  if (isLoading) return <Page>Loading...</Page>;
-  if (!data) return <Page>Playlist not found.</Page>;
+  if (isLoading) {
+    return (
+      <Page>
+        <Skeleton style={{ width: 110, height: 14 }} />
+        <Skeleton style={{ width: "min(420px, 70%)", height: 46, marginTop: 18 }} />
+        <Skeleton style={{ width: "min(300px, 50%)", height: 14, marginTop: 14 }} />
+        <div
+          style={{
+            marginTop: 26,
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
+            gap: 14,
+          }}
+        >
+          <SkeletonCard lines={6} />
+          <SkeletonCard lines={4} className="fade-in" style={{ ["--d" as string]: "120ms" }} />
+        </div>
+      </Page>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Page>
+        <Card dashed className="rise" style={{ textAlign: "center", padding: "clamp(30px, 6vw, 60px)" }}>
+          <CardTitle>Playlist not found</CardTitle>
+          <Muted>It may have been deleted, or the link is out of date.</Muted>
+          <div style={{ marginTop: 18 }}>
+            <Link to="/dashboard">
+              <Button>← Back to library</Button>
+            </Link>
+          </div>
+        </Card>
+      </Page>
+    );
+  }
 
   const verifiedCount = data.songs.filter(isVerified).length;
   const agentList = uniqueAgents(data.songs);
@@ -135,249 +180,195 @@ export function PlaylistDetailPage() {
 
   return (
     <Page>
-      <Row style={{ justifyContent: "space-between", alignItems: "flex-end", gap: 14 }}>
-        <div style={{ flex: 1, minWidth: "min(100%, 240px)" }}>
-          <Pill style={{ width: "fit-content", marginBottom: 14 }}>Playlist detail</Pill>
-          <H1>{data.name ?? "Untitled"}</H1>
-          <Muted style={{ fontSize: "clamp(15px, 3.6vw, 17px)", lineHeight: 1.65 }}>
+      <Link to="/dashboard" className="mono" style={{ color: "var(--muted)", fontWeight: 600 }}>
+        ← Library
+      </Link>
+
+      {/* ---- Header band ---- */}
+      <div className="section-head" style={{ marginTop: 16, alignItems: "flex-end" }}>
+        <div style={{ minWidth: "min(100%, 260px)" }}>
+          <Eyebrow>Playlist</Eyebrow>
+          <H1 style={{ marginTop: 12 }}>{data.name ?? "Untitled"}</H1>
+          <Muted style={{ fontSize: 15.5, lineHeight: 1.65, maxWidth: 620 }}>
             {data.description ?? "No description"}
           </Muted>
+          <Row style={{ marginTop: 14, gap: 8 }}>
+            <Chip>{data.total_songs} songs</Chip>
+            <Chip tone="ok">{verifiedCount} verified</Chip>
+            <Chip>{agentList.length} agents</Chip>
+          </Row>
         </div>
-        <Pill>{data.total_songs} songs</Pill>
-      </Row>
 
-      <Row style={{ marginTop: 14 }}>
-        <Button onClick={() => setEditing((value) => !value)}>{editing ? "Cancel" : "Edit"}</Button>
-        <PrimaryButton disabled={exportMut.isPending} onClick={() => exportMut.mutate()}>
-          {exportMut.isPending ? "Saving..." : "Save to Spotify"}
-        </PrimaryButton>
-        <DangerButton
-          disabled={deleteMut.isPending}
-          onClick={() => {
-            if (confirm("Delete this playlist?")) deleteMut.mutate();
-          }}
-        >
-          {deleteMut.isPending ? "Deleting..." : "Delete"}
-        </DangerButton>
-        <Link to="/dashboard" style={{ alignSelf: "center", fontWeight: 600 }}>
-          Back
-        </Link>
-      </Row>
+        <Row style={{ gap: 8, paddingBottom: 4 }}>
+          <Button className="btn--ghost btn--sm" onClick={() => setEditing((value) => !value)}>
+            {editing ? "Cancel" : "Edit"}
+          </Button>
+          <PrimaryButton className="btn--sm" disabled={exportMut.isPending} onClick={() => exportMut.mutate()}>
+            {exportMut.isPending && <Spinner />}
+            {exportMut.isPending ? "Saving..." : "Save to Spotify"}
+          </PrimaryButton>
+          <DangerButton
+            className="btn--sm"
+            disabled={deleteMut.isPending}
+            onClick={() => {
+              if (confirm("Delete this playlist?")) deleteMut.mutate();
+            }}
+          >
+            {deleteMut.isPending && <Spinner />}
+            {deleteMut.isPending ? "Deleting..." : "Delete"}
+          </DangerButton>
+        </Row>
+      </div>
 
       <div
         style={{
-          marginTop: 14,
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 330px), 1fr))",
-          gap: 14,
+          gap: 18,
+          alignItems: "start",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 340px), 1fr))",
         }}
       >
-        <Card>
-          <CardTitle>Details</CardTitle>
-          <div
-            style={{
-              display: "grid",
-              gap: 10,
-              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-              marginTop: 14,
-            }}
-          >
-            <Card style={{ padding: 14, background: "color-mix(in srgb, var(--panel-strong) 92%, transparent)" }}>
-              <CardTitle style={{ fontSize: 18 }}>{verifiedCount}</CardTitle>
-              <Muted style={{ marginTop: 4 }}>Verified songs</Muted>
-            </Card>
-            <Card style={{ padding: 14, background: "color-mix(in srgb, var(--panel-strong) 92%, transparent)" }}>
-              <CardTitle style={{ fontSize: 18 }}>{agentList.length}</CardTitle>
-              <Muted style={{ marginTop: 4 }}>Agents involved</Muted>
-            </Card>
+        {/* ---- Track table (main) ---- */}
+        <Card style={{ gridColumn: "span 1", padding: "clamp(14px, 2.4vw, 22px)" }}>
+          <div style={{ padding: "6px 8px 0" }}>
+            <Row style={{ justifyContent: "space-between", gap: 12 }}>
+              <CardTitle>Tracklist</CardTitle>
+              <Chip>
+                {currentPage} / {totalPages}
+              </Chip>
+            </Row>
+            <div className="hairline" style={{ margin: "14px 0 8px" }} />
           </div>
 
-          <Divider />
-
-          <Muted style={{ lineHeight: 1.65 }}>Created: {data.created_at ? new Date(data.created_at).toLocaleString() : "-"}</Muted>
-          <Muted style={{ lineHeight: 1.65 }}>Updated: {data.updated_at ? new Date(data.updated_at).toLocaleString() : "-"}</Muted>
-
-          {promptPreview ? (
-            <>
-              <Divider />
-              <div>
-                <Muted style={{ marginTop: 0 }}>Source prompt</Muted>
-                <Card style={{ padding: 14, marginTop: 8, background: "color-mix(in srgb, var(--panel-strong) 92%, transparent)" }}>
-                  <Muted style={{ marginTop: 0, lineHeight: 1.65, color: "var(--text)" }}>{promptPreview}</Muted>
-                </Card>
-              </div>
-            </>
-          ) : null}
-
-          <Divider />
-
-          <Stack style={{ gap: 12 }}>
-            <div>
-              <Muted style={{ marginTop: 0 }}>Contributing agents</Muted>
-              <Row style={{ marginTop: 8, gap: 8 }}>
-                {agentList.length > 0 ? (
-                  agentList.map((agent) => (
-                    <Pill key={agent} style={{ minHeight: 30 }}>
-                      {agent}
-                    </Pill>
-                  ))
-                ) : (
-                  <Pill style={{ minHeight: 30 }}>No agent data</Pill>
-                )}
-              </Row>
-            </div>
-
-            <div>
-              <Muted style={{ marginTop: 0 }}>Top genres</Muted>
-              <Row style={{ marginTop: 8, gap: 8 }}>
-                {genreList.length > 0 ? (
-                  genreList.map((genre) => (
-                    <Pill key={genre} style={{ minHeight: 30 }}>
-                      {genre}
-                    </Pill>
-                  ))
-                ) : (
-                  <Pill style={{ minHeight: 30 }}>No genre tags</Pill>
-                )}
-              </Row>
-            </div>
-          </Stack>
-
-          {editing && (
-            <>
-              <Divider />
-              <Stack>
-                <div>
-                  <Muted>Name</Muted>
-                  <Input value={name} onChange={(event) => setName(event.target.value)} />
-                </div>
-
-                <div>
-                  <Muted>Description</Muted>
-                  <Textarea rows={3} value={description} onChange={(event) => setDescription(event.target.value)} />
-                </div>
-
-                <PrimaryButton disabled={updateMut.isPending} onClick={() => updateMut.mutate()} style={{ width: "fit-content" }}>
-                  {updateMut.isPending ? "Saving..." : "Save changes"}
-                </PrimaryButton>
-              </Stack>
-            </>
-          )}
-        </Card>
-
-        <Card>
-          <Row style={{ justifyContent: "space-between", alignItems: "flex-end", gap: 12 }}>
-            <div>
-              <CardTitle>Songs</CardTitle>
-              <Muted>Open Spotify links when available.</Muted>
-            </div>
-            <Pill>
-              Page {currentPage} of {totalPages}
-            </Pill>
-          </Row>
-
-          <ol style={{ marginTop: 12, paddingLeft: 20, display: "grid", gap: 14 }}>
+          <div>
             {paginatedSongs.map((song, index) => {
+              const absoluteIndex = pageStart + index;
               const spotifyUrl =
                 typeof song.spotify_url === "string"
                   ? song.spotify_url
                   : typeof song.verified?.spotify_url === "string"
                     ? song.verified.spotify_url
                     : null;
+
               return (
-                <li
-                  key={`${songLabel(song)}-${index}`}
-                  style={{
-                    lineHeight: 1.45,
-                    padding: "14px 0 0",
-                    borderTop: index === 0 ? "none" : "1px solid var(--border)",
-                  }}
+                <div
+                  key={`${songLabel(song)}-${absoluteIndex}`}
+                  className="track rise"
+                  style={{ ["--d" as string]: `${Math.min(index * 40, 480)}ms` }}
                 >
-                  {spotifyUrl ? (
-                    <a href={spotifyUrl} target="_blank" rel="noreferrer">
-                      <strong style={{ fontSize: 16 }}>{songLabel(song)}</strong>
-                    </a>
-                  ) : (
-                    <strong style={{ fontSize: 16 }}>{songLabel(song)}</strong>
-                  )}
-                  {song.reason ? <div style={{ color: "var(--muted)" }}>{String(song.reason)}</div> : null}
-                  <div style={{ marginTop: 6, display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <span
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        minHeight: 24,
-                        padding: "0 10px",
-                        borderRadius: 999,
-                        border: "1px solid var(--border)",
-                        fontSize: 12,
-                        background: "color-mix(in srgb, var(--panel-soft) 85%, transparent)",
-                        color: "var(--muted)",
-                      }}
-                    >
-                      Agent: {agentsLabel(song)}
-                    </span>
-                    <span
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        minHeight: 24,
-                        padding: "0 10px",
-                        borderRadius: 999,
-                        border: "1px solid var(--border)",
-                        fontSize: 12,
-                        background: isVerified(song) ? "rgba(37, 87, 214, 0.08)" : "color-mix(in srgb, var(--panel-soft) 85%, transparent)",
-                        color: isVerified(song) ? "var(--accent)" : "var(--muted)",
-                      }}
-                    >
-                      Verified: {verificationStatus(song)}
-                    </span>
-                    {typeof song.verified?.confidence === "number" ? (
-                      <span
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          minHeight: 24,
-                          padding: "0 10px",
-                          borderRadius: 999,
-                          border: "1px solid var(--border)",
-                          fontSize: 12,
-                          background: "color-mix(in srgb, var(--panel-soft) 85%, transparent)",
-                          color: "var(--muted)",
-                        }}
-                      >
-                        Confidence: {Math.round(song.verified.confidence * 100)}%
-                      </span>
-                    ) : null}
+                  <span className="track-idx">{String(absoluteIndex + 1).padStart(2, "0")}</span>
+                  <div style={{ minWidth: 0 }}>
+                    {spotifyUrl ? (
+                      <a href={spotifyUrl} target="_blank" rel="noreferrer" style={{ color: "inherit" }}>
+                        <p className="track-title">{songLabel(song)} ↗</p>
+                      </a>
+                    ) : (
+                      <p className="track-title">{songLabel(song)}</p>
+                    )}
+                    {song.reason ? <p className="track-sub">{String(song.reason)}</p> : null}
+                    <div className="track-meta">
+                      <Chip title={agentsFull(song)}>{agentsLabel(song)}</Chip>
+                      <Chip tone={isVerified(song) ? "ok" : undefined}>
+                        <span className={isVerified(song) ? "dot dot--ok" : "dot dot--muted"} />
+                        {verificationStatus(song)}
+                      </Chip>
+                      {typeof song.verified?.confidence === "number" ? (
+                        <Chip>{Math.round(song.verified.confidence * 100)}%</Chip>
+                      ) : null}
+                    </div>
                   </div>
-                </li>
+                </div>
               );
             })}
-          </ol>
+          </div>
 
           {data.songs.length > SONGS_PER_PAGE ? (
-            <Row style={{ marginTop: 18, justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-              <Muted style={{ margin: 0 }}>
-                Showing {pageStart + 1}-{Math.min(pageStart + SONGS_PER_PAGE, data.songs.length)} of {data.songs.length} songs
+            <Row style={{ marginTop: 16, padding: "0 8px", justifyContent: "space-between", gap: 12 }}>
+              <Muted className="mono" style={{ margin: 0, fontSize: 12 }}>
+                {pageStart + 1}–{Math.min(pageStart + SONGS_PER_PAGE, data.songs.length)} of {data.songs.length}
               </Muted>
-              <Row style={{ gap: 10 }}>
-                <Button disabled={currentPage === 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>
-                  Previous
+              <Row style={{ gap: 8 }}>
+                <Button className="btn--sm" disabled={currentPage === 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>
+                  ← Prev
                 </Button>
-                <Button
-                  disabled={currentPage === totalPages}
-                  onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
-                >
-                  Next
+                <Button className="btn--sm" disabled={currentPage === totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))}>
+                  Next →
                 </Button>
               </Row>
             </Row>
           ) : null}
 
-          <Muted>
+          <Muted className="mono" style={{ fontSize: 11.5, padding: "12px 8px 4px" }}>
             Track metadata and links are provided by Spotify. Spotify is a trademark of Spotify AB.
           </Muted>
         </Card>
+
+        {/* ---- Details aside ---- */}
+        <div style={{ display: "grid", gap: 14, alignSelf: "start" }}>
+          {editing && (
+            <Card tinted className="scale-in">
+              <Eyebrow>Edit playlist</Eyebrow>
+              <Stack style={{ marginTop: 14 }}>
+                <div>
+                  <FieldLabel htmlFor="pl-name">Name</FieldLabel>
+                  <Input id="pl-name" value={name} onChange={(event) => setName(event.target.value)} />
+                </div>
+
+                <div>
+                  <FieldLabel htmlFor="pl-desc">Description</FieldLabel>
+                  <Textarea id="pl-desc" rows={3} value={description} onChange={(event) => setDescription(event.target.value)} />
+                </div>
+
+                <PrimaryButton disabled={updateMut.isPending} onClick={() => updateMut.mutate()} style={{ width: "fit-content" }}>
+                  {updateMut.isPending && <Spinner />}
+                  {updateMut.isPending ? "Saving..." : "Save changes"}
+                </PrimaryButton>
+              </Stack>
+            </Card>
+          )}
+
+          {promptPreview ? (
+            <Card>
+              <Eyebrow>Source prompt</Eyebrow>
+              <Muted style={{ marginTop: 12, lineHeight: 1.7, color: "var(--text)", fontStyle: "italic" }}>
+                “{promptPreview}”
+              </Muted>
+            </Card>
+          ) : null}
+
+          <Card>
+            <Eyebrow>Contributing agents</Eyebrow>
+            <Row style={{ marginTop: 12, gap: 6 }}>
+              {agentList.length > 0 ? (
+                agentList.map((agent) => (
+                  <Chip key={agent} tone="warm">
+                    {agent}
+                  </Chip>
+                ))
+              ) : (
+                <Chip>No agent data</Chip>
+              )}
+            </Row>
+
+            <div className="hairline" />
+
+            <Eyebrow>Top genres</Eyebrow>
+            <Row style={{ marginTop: 12, gap: 6 }}>
+              {genreList.length > 0 ? (
+                genreList.map((genre) => <Chip key={genre}>{genre}</Chip>)
+              ) : (
+                <Chip>No genre tags</Chip>
+              )}
+            </Row>
+
+            <div className="hairline" />
+
+            <div className="mono" style={{ color: "var(--muted)", display: "grid", gap: 6 }}>
+              <span>created · {data.created_at ? new Date(data.created_at).toLocaleString() : "—"}</span>
+              <span>updated · {data.updated_at ? new Date(data.updated_at).toLocaleString() : "—"}</span>
+            </div>
+          </Card>
+        </div>
       </div>
     </Page>
   );

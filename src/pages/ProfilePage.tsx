@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { changePassword, deleteMe, disconnectSpotify, getSpotifyConnectUrl, me, updateMe } from "../features/users/users.api";
 import { clearToken } from "../lib/auth";
@@ -8,20 +8,24 @@ import {
   Button,
   Card,
   CardTitle,
+  Chip,
   DangerButton,
+  Eyebrow,
+  FieldLabel,
   H1,
   Input,
   Muted,
   Page,
   PrimaryButton,
   Row,
+  Skeleton,
+  SkeletonCard,
+  Spinner,
   Stack,
-  Divider,
-  Pill,
 } from "../components/ui";
 
 export function ProfilePage() {
-  const { theme, toggle } = useTheme();
+  const { theme, setTheme } = useTheme();
   const nav = useNavigate();
   const location = useLocation();
   const qc = useQueryClient();
@@ -102,82 +106,112 @@ export function ProfilePage() {
     nav("/");
   };
 
-  if (isLoading) return <Page>Loading...</Page>;
-  if (!data) return <Page>Could not load profile.</Page>;
+  if (isLoading) {
+    return (
+      <Page>
+        <Skeleton style={{ width: 100, height: 14 }} />
+        <Skeleton style={{ width: "min(280px, 60%)", height: 46, marginTop: 18 }} />
+        <div style={{ marginTop: 26, display: "grid", gap: 14, maxWidth: 760 }}>
+          <SkeletonCard lines={3} />
+          <SkeletonCard lines={3} className="fade-in" style={{ ["--d" as string]: "120ms" }} />
+          <SkeletonCard lines={3} className="fade-in" style={{ ["--d" as string]: "240ms" }} />
+        </div>
+      </Page>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Page>
+        <Card dashed className="rise" style={{ textAlign: "center", padding: "clamp(30px, 6vw, 60px)" }}>
+          <CardTitle>Could not load profile</CardTitle>
+          <Muted>Try refreshing, or log in again if your session expired.</Muted>
+        </Card>
+      </Page>
+    );
+  }
+
   const spotifyConnected = Boolean(data.spotify_connected || data.spotify?.spotify_user_id);
 
   return (
     <Page>
-      <Row style={{ justifyContent: "space-between", alignItems: "flex-end", gap: 12 }}>
-        <div style={{ flex: 1, minWidth: "min(100%, 220px)" }}>
-          <Pill style={{ width: "fit-content", marginBottom: 14 }}>Account settings</Pill>
-          <H1>Profile</H1>
-          <Muted style={{ fontSize: "clamp(15px, 3.8vw, 18px)", lineHeight: 1.65 }}>
-            Your account, Spotify connection, theme preference, and security settings.
-          </Muted>
+      <div className="section-head">
+        <div>
+          <Eyebrow>Account</Eyebrow>
+          <H1 style={{ marginTop: 12 }}>Profile</H1>
         </div>
-
-        <Row>
-          <Pill>{data.gmail}</Pill>
-          <Button onClick={logout}>Logout</Button>
+        <Row style={{ gap: 10 }}>
+          <Chip>{data.gmail}</Chip>
+          <Button className="btn--ghost btn--sm" onClick={logout}>
+            Log out
+          </Button>
         </Row>
-      </Row>
+      </div>
 
-      <div
-        style={{
-          marginTop: 18,
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 330px), 1fr))",
-          gap: 14,
-        }}
-      >
-        <Card>
-          <Stack>
+      <div style={{ display: "grid", gap: 14, maxWidth: 760 }}>
+        {/* ---- Identity ---- */}
+        <Card className="rise">
+          <Eyebrow>Identity</Eyebrow>
+          <Stack style={{ marginTop: 14 }}>
             <div>
-              <Muted>Username</Muted>
-              <Input value={username} onChange={(event) => setUsername(event.target.value)} />
+              <FieldLabel htmlFor="username">Username</FieldLabel>
+              <Input id="username" value={username} onChange={(event) => setUsername(event.target.value)} />
             </div>
-
-            <Divider />
-
-            <Row>
-              <Pill>Theme: {theme === "light" ? "Light" : "Dark"}</Pill>
-              <Button onClick={toggle}>Switch to {theme === "light" ? "Dark" : "Light"}</Button>
-            </Row>
-
-            <Row>
-              <PrimaryButton disabled={updateMut.isPending} onClick={() => updateMut.mutate()}>
-                {updateMut.isPending ? "Saving..." : "Save profile"}
-              </PrimaryButton>
-              <Link to="/dashboard" style={{ alignSelf: "center", fontWeight: 600 }}>
-                Back
-              </Link>
-            </Row>
+            <PrimaryButton
+              disabled={updateMut.isPending}
+              onClick={() => updateMut.mutate()}
+              style={{ width: "fit-content" }}
+            >
+              {updateMut.isPending && <Spinner />}
+              {updateMut.isPending ? "Saving..." : "Save profile"}
+            </PrimaryButton>
           </Stack>
         </Card>
 
-        <Card>
-          <CardTitle>Spotify</CardTitle>
-          <Muted style={{ lineHeight: 1.65 }}>Connect your account to create playlists directly in Spotify.</Muted>
+        {/* ---- Appearance ---- */}
+        <Card className="rise" style={{ ["--d" as string]: "80ms" }}>
+          <Eyebrow>Appearance</Eyebrow>
+          <Muted style={{ marginTop: 12 }}>Theme follows this setting on every device you log in from.</Muted>
+          <Row style={{ marginTop: 14, gap: 8 }}>
+            <Button
+              className={theme === "light" ? "btn--sm" : "btn--ghost btn--sm"}
+              style={theme === "light" ? { borderColor: "var(--primary)", color: "var(--primary)" } : undefined}
+              onClick={() => setTheme("light")}
+            >
+              ☀ Light
+            </Button>
+            <Button
+              className={theme === "dark" ? "btn--sm" : "btn--ghost btn--sm"}
+              style={theme === "dark" ? { borderColor: "var(--primary)", color: "var(--primary)" } : undefined}
+              onClick={() => setTheme("dark")}
+            >
+              ☾ Dark
+            </Button>
+          </Row>
+        </Card>
 
-          <Divider />
+        {/* ---- Spotify ---- */}
+        <Card className="rise" style={{ ["--d" as string]: "160ms" }}>
+          <Row style={{ justifyContent: "space-between", gap: 10 }}>
+            <Eyebrow>Spotify</Eyebrow>
+            <Chip tone={spotifyConnected ? "ok" : undefined}>
+              <span className={spotifyConnected ? "dot dot--ok" : "dot dot--muted"} />
+              {spotifyConnected ? "connected" : "not connected"}
+            </Chip>
+          </Row>
+          <Muted style={{ marginTop: 12, lineHeight: 1.65 }}>
+            Connect your account to create playlists directly in Spotify.
+          </Muted>
+          {data.spotify?.spotify_user_id ? (
+            <Muted className="mono" style={{ fontSize: 12 }}>user · {data.spotify.spotify_user_id}</Muted>
+          ) : null}
 
-          <Stack>
-            <Row>
-              <Pill>
-                {spotifyConnected ? "Spotify connected" : "Spotify not connected"}
-              </Pill>
-            </Row>
-
-            {data.spotify?.spotify_user_id ? (
-              <Muted style={{ marginTop: 0 }}>Spotify user: {data.spotify.spotify_user_id}</Muted>
-            ) : null}
-
+          <Row style={{ marginTop: 16, gap: 10 }}>
             <PrimaryButton
               onClick={() => connectSpotifyMut.mutate()}
               disabled={spotifyConnected || connectSpotifyMut.isPending}
-              style={{ width: "fit-content" }}
             >
+              {connectSpotifyMut.isPending && <Spinner />}
               {connectSpotifyMut.isPending ? "Connecting..." : spotifyConnected ? "Connected" : "Connect with Spotify"}
             </PrimaryButton>
 
@@ -186,57 +220,83 @@ export function ProfilePage() {
                 if (confirm("Disconnect your Spotify account?")) disconnectSpotifyMut.mutate();
               }}
               disabled={!spotifyConnected || disconnectSpotifyMut.isPending}
-              style={{ width: "fit-content" }}
             >
-              {disconnectSpotifyMut.isPending ? "Disconnecting..." : "Disconnect Spotify"}
+              {disconnectSpotifyMut.isPending && <Spinner />}
+              {disconnectSpotifyMut.isPending ? "Disconnecting..." : "Disconnect"}
             </DangerButton>
+          </Row>
 
-            <Muted style={{ marginTop: 0 }}>
-              Spotify data used in this app stays linked to Spotify content and links.
-            </Muted>
-          </Stack>
+          <Muted className="mono" style={{ fontSize: 11.5, marginTop: 14 }}>
+            Spotify data used in this app stays linked to Spotify content and links.
+          </Muted>
         </Card>
 
-        <Card>
-          <CardTitle>Security</CardTitle>
-          <Muted>Change password</Muted>
-
-          <Divider />
-
-          <Stack>
-            <Input
-              type="password"
-              placeholder="Old password"
-              value={oldPassword}
-              onChange={(event) => setOldPassword(event.target.value)}
-            />
-            <Input
-              type="password"
-              placeholder="New password"
-              value={newPassword}
-              onChange={(event) => setNewPassword(event.target.value)}
-            />
+        {/* ---- Security ---- */}
+        <Card className="rise" style={{ ["--d" as string]: "240ms" }}>
+          <Eyebrow>Security</Eyebrow>
+          <Stack style={{ marginTop: 14 }}>
+            <div
+              style={{
+                display: "grid",
+                gap: 12,
+                gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))",
+              }}
+            >
+              <div>
+                <FieldLabel htmlFor="old-pass">Current password</FieldLabel>
+                <Input
+                  id="old-pass"
+                  type="password"
+                  placeholder="••••••••"
+                  value={oldPassword}
+                  onChange={(event) => setOldPassword(event.target.value)}
+                />
+              </div>
+              <div>
+                <FieldLabel htmlFor="new-pass">New password</FieldLabel>
+                <Input
+                  id="new-pass"
+                  type="password"
+                  placeholder="••••••••"
+                  value={newPassword}
+                  onChange={(event) => setNewPassword(event.target.value)}
+                />
+              </div>
+            </div>
 
             <PrimaryButton
               disabled={passMut.isPending || !oldPassword || !newPassword}
               onClick={() => passMut.mutate()}
               style={{ width: "fit-content" }}
             >
+              {passMut.isPending && <Spinner />}
               {passMut.isPending ? "Updating..." : "Update password"}
             </PrimaryButton>
-
-            <Divider style={{ marginTop: 16 }} />
-
-            <Muted>Danger zone</Muted>
-            <DangerButton
-              disabled={deleteMut.isPending}
-              onClick={() => {
-                if (confirm("Delete account permanently?")) deleteMut.mutate();
-              }}
-            >
-              {deleteMut.isPending ? "Deleting..." : "Delete account"}
-            </DangerButton>
           </Stack>
+        </Card>
+
+        {/* ---- Danger zone ---- */}
+        <Card
+          className="rise"
+          style={{
+            borderColor: "color-mix(in srgb, var(--danger) 34%, transparent)",
+            ["--d" as string]: "320ms",
+          }}
+        >
+          <Eyebrow style={{ color: "var(--danger)" }}>Danger zone</Eyebrow>
+          <Muted style={{ marginTop: 12 }}>
+            Deleting your account removes your library and settings permanently.
+          </Muted>
+          <DangerButton
+            style={{ marginTop: 14 }}
+            disabled={deleteMut.isPending}
+            onClick={() => {
+              if (confirm("Delete account permanently?")) deleteMut.mutate();
+            }}
+          >
+            {deleteMut.isPending && <Spinner />}
+            {deleteMut.isPending ? "Deleting..." : "Delete account"}
+          </DangerButton>
         </Card>
       </div>
     </Page>
