@@ -8,7 +8,7 @@ import { ErrorText, Eyebrow, FieldLabel, Input, Muted, PrimaryButton, Spinner, S
 
 const schema = z.object({
   gmail: z.string().email("Invalid email"),
-  password: z.string().min(1, "Password is required"),
+  password: z.string().min(1, "Password is required").max(256, "Password is too long"),
 });
 
 type FormValues = z.infer<typeof schema>;

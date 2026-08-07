@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { changePassword, deleteMe, disconnectSpotify, getSpotifyConnectUrl, me, updateMe } from "../features/users/users.api";
-import { clearToken } from "../lib/auth";
+import { clearToken, setToken } from "../lib/auth";
 import { useTheme } from "../theme";
 import {
   Button,
@@ -52,7 +52,8 @@ export function ProfilePage() {
 
   const passMut = useMutation({
     mutationFn: () => changePassword({ old_password: oldPassword, new_password: newPassword }),
-    onSuccess: () => {
+    onSuccess: (token) => {
+      setToken(token.access_token);
       setOldPassword("");
       setNewPassword("");
       alert("Password updated.");

@@ -9,7 +9,7 @@ import { ErrorText, Eyebrow, FieldLabel, Input, Muted, PrimaryButton, Spinner, S
 const schema = z.object({
   username: z.string().min(2, "Username too short"),
   gmail: z.string().email("Invalid email"),
-  password: z.string().min(6, "Min 6 chars"),
+  password: z.string().min(12, "Use at least 12 characters").max(256, "Password is too long"),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -125,7 +125,7 @@ export function RegisterPage() {
 
               <div>
                 <FieldLabel htmlFor="password">Password</FieldLabel>
-                <Input id="password" placeholder="Min 6 characters" type="password" autoComplete="new-password" {...register("password")} />
+                <Input id="password" placeholder="At least 12 characters" type="password" autoComplete="new-password" {...register("password")} />
                 {errors.password && <ErrorText>{errors.password.message}</ErrorText>}
               </div>
 

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { generatePlaylist, savePlaylist } from "../features/playlists/playlists.api";
 import type { PlaylistDraftOut, Song } from "../features/playlists/playlists.types";
+import { safeSpotifyTrackUrl } from "../lib/externalUrls";
 import {
   Button,
   Card,
@@ -55,12 +56,7 @@ function isVerified(song: Song) {
 }
 
 function TrackRow({ song, index }: { song: Song; index: number }) {
-  const spotifyUrl =
-    typeof song.spotify_url === "string"
-      ? song.spotify_url
-      : typeof song.verified?.spotify_url === "string"
-        ? song.verified.spotify_url
-        : null;
+  const spotifyUrl = safeSpotifyTrackUrl(song.spotify_url) ?? safeSpotifyTrackUrl(song.verified?.spotify_url);
 
   return (
     <div className="track rise" style={{ ["--d" as string]: `${Math.min((index % 15) * 40, 480)}ms` }}>

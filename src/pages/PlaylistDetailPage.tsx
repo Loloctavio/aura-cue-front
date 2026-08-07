@@ -3,6 +3,7 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { deletePlaylist, exportPlaylistToSpotify, getPlaylist, updatePlaylist } from "../features/playlists/playlists.api";
 import type { Song } from "../features/playlists/playlists.types";
+import { safeSpotifyPlaylistUrl, safeSpotifyTrackUrl } from "../lib/externalUrls";
 import {
   Button,
   Card,
@@ -123,8 +124,9 @@ export function PlaylistDetailPage() {
     mutationFn: () => exportPlaylistToSpotify(playlistId!, { public: true }),
     onSuccess: (result) => {
       alert("Playlist saved to Spotify successfully.");
-      if (result.spotify_playlist_url) {
-        window.open(result.spotify_playlist_url, "_blank", "noopener,noreferrer");
+      const spotifyUrl = safeSpotifyPlaylistUrl(result.spotify_playlist_url);
+      if (spotifyUrl) {
+        window.open(spotifyUrl, "_blank", "noopener,noreferrer");
       }
     },
     onError: () => {
@@ -243,12 +245,7 @@ export function PlaylistDetailPage() {
           <div>
             {paginatedSongs.map((song, index) => {
               const absoluteIndex = pageStart + index;
-              const spotifyUrl =
-                typeof song.spotify_url === "string"
-                  ? song.spotify_url
-                  : typeof song.verified?.spotify_url === "string"
-                    ? song.verified.spotify_url
-                    : null;
+              const spotifyUrl = safeSpotifyTrackUrl(song.spotify_url) ?? safeSpotifyTrackUrl(song.verified?.spotify_url);
 
               return (
                 <div
